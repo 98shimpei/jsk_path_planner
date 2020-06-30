@@ -1,0 +1,76 @@
+<launch>
+  <arg name="MANAGER"           default="nodelet_manager" />
+  <arg name="INPUT_CLOUD"       default="/multisense_local/image_points2_color" />
+  <arg name="INPUT_IMAGE"       default="/multisense_local/left/image_rect_color" />
+  <arg name="INPUT_CAMERA_INFO" default="/multisense_local/left/camera_info" />
+  <arg name="rviz"              default="true" />
+
+  <!-- nodelet manager -->
+  <node name="$(arg MANAGER)" pkg="nodelet" type="nodelet" args="manager" />
+
+  <!-- extract green boxes -->
+  <include file="$(find opencv_apps)/launch/hsv_color_filter.launch" >
+    <arg name="node_name" value="green_hsv_color_filter" />
+    <arg name="image" value="$(arg INPUT_IMAGE)" />
+    <!-- <arg name="h_limit_max" value="144" doc="The maximum allowed field value Hue" /> -->
+    <!-- <arg name="h_limit_min" value="90"  doc="The minimum allowed field value Hue" /> -->
+    <!-- <arg name="s_limit_max" value="256" doc="The maximum allowed field value Saturation" /> -->
+    <!-- <arg name="s_limit_min" value="170" doc="The minimum allowed field value Saturation" /> -->
+    <!-- <arg name="v_limit_max" value="256" doc="The maximum allowed field value Value" /> -->
+    <!-- <arg name="v_limit_min" value="95"  doc="The minimum allowed field value Value" /> -->
+    <arg name="h_limit_max" value="183" doc="The maximum allowed field value Hue" />
+    <arg name="h_limit_min" value="127"  doc="The minimum allowed field value Hue" />
+    <arg name="s_limit_max" value="256" doc="The maximum allowed field value Saturation" />
+    <arg name="s_limit_min" value="0" doc="The minimum allowed field value Saturation" />
+    <arg name="v_limit_max" value="256" doc="The maximum allowed field value Value" />
+    <arg name="v_limit_min" value="0"  doc="The minimum allowed field value Value" />
+    <arg name="debug_view" value="false" />
+  </include>
+
+  <node name="green_erode_mask_image"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_perception/ErodeMaskImage $(arg MANAGER)">
+    <remap from="~input" to="green_hsv_color_filter/image" />
+    <rosparam>
+      method: 0
+      size: 3
+    </rosparam>
+  </node>
+
+  <node name="green_dilate_mask_image"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_perception/DilateMaskImage $(arg MANAGER)">
+    <remap from="~input" to="green_erode_mask_image/output" />
+    <rosparam>
+      method: 0
+      size: 3
+    </rosparam>
+  </node>
+
+  <!-- extract blue boxes -->
+  <include file="$(find opencv_apps)/launch/hsv_color_filter.launch" >
+    <arg name="node_name" value="blue_hsv_color_filter" />
+    <arg name="image" value="$(arg INPUT_IMAGE)" />
+    <arg name="h_limit_max" value="282" doc="The maximum allowed field value Hue" />
+    <arg name="h_limit_min" value="170" doc="The minimum allowed field value Hue" />
+    <arg name="s_limit_max" value="256" doc="The maximum allowed field value Saturation" />
+    <arg name="s_limit_min" value="170" doc="The minimum allowed field value Saturation" />
+    <arg name="v_limit_max" value="256" doc="The maximum allowed field value Value" />
+    <arg name="v_limit_min" value="95"  doc="The minimum allowed field value Value" />
+    <arg name="debug_view" value="false" />
+  </include>
+
+  <node pkg="jsk_path_planner" type="masked_images_to_label.py"
+        name="masked_images_to_label" output="screen">
+  </node>
+
+  <node pkg="jsk_path_planner" type="label_to_cost.py"
+        name="label_to_cost" output="screen">
+  </node>
+
+  <!-- visualize -->
+  <node name="rviz" pkg="rviz" type="rviz"
+        args="-d $(find jsk_path_planner)/config/color_object_recognition.rviz"
+        output="screen" if="$(arg rviz)"/>
+
+</launch>
