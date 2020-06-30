@@ -17,8 +17,8 @@
   </include>
 
   <!-- path follow init -->
-  <!-- <node pkg="jsk_path_planner" type="path-follow-init.l" -->
-  <!--       name="path_follow_init" output="screen" if="$(arg init)"/> -->
+  <node pkg="jsk_path_planner" type="path-follow-init.l"
+        name="path_follow_init" output="screen" if="$(arg init)"/>
 
   <!-- publish heightmap gradient -->
   <node pkg="jsk_path_planner" type="calc_heightmap_gradient"
