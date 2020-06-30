@@ -21,7 +21,7 @@
   <!--       name="path_follow_init" output="screen" if="$(arg init)"/> -->
 
   <!-- publish heightmap gradient -->
-  <node pkg="safe_footstep_planner" type="calc_heightmap_gradient"
+  <node pkg="jsk_path_planner" type="calc_heightmap_gradient"
         name="calc_heightmap_gradient" output="screen">
     <remap from="~input" to="/accumulated_heightmap/output" />
     <remap from="~output" to="/heightmap_gradient" />
@@ -38,7 +38,7 @@
   </node>
 
   <!-- consider steppable region -->
-  <!-- <include file="$(find safe_footstep_planner)/launch/steppable_region_choreonoid.launch" /> -->
+  <!-- <include file="$(find jsk_path_planner)/launch/steppable_region_choreonoid.launch" /> -->
 
   <!-- visualize -->
   <node name="rviz" pkg="rviz" type="rviz"

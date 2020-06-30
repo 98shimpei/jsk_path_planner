@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 # from __future__ import print_function
 
-# import roslib
-# roslib.load_manifest('safe_footstep_planner')
 import sys
 import os
 import rospy
