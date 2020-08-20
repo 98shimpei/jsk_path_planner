@@ -1,0 +1,38 @@
+<launch>
+
+  <arg name="rviz" default="true" />
+  <arg name="SELF_FILTER_PARAM" value="$(find hrpsys_choreonoid_tutorials)/config/jaxon_self_filter.yaml" />
+
+  <rosparam param="/use_sim_time">true</rosparam>
+
+  <node type="point_cloud2_assembler" pkg="laser_assembler"
+        name="chest_camera_assembler">
+    <remap from="cloud" to="/chest_camera/depth_registered/points"/>
+    <param name="max_clouds" type="int" value="400" />
+    <!-- <param name="fixed_frame" type="string" value="d435_color_optical_frame" /> -->
+    <param name="fixed_frame" type="string" value="map" />
+  </node>
+
+  <node name="assembled_pointcloud_publisher" pkg="jsk_path_planner" type="publish_assembled_pointcloud2.py" />
+
+  <!-- self filter -->
+  <node pkg="robot_self_filter" type="self_filter"
+        name="chest_pointcloud_self_filter" output="screen">
+    <remap from="cloud_in"  to="/assembled_pointcloud2" />
+    <remap from="cloud_out" to="/assembled_pointcloud2_filtered" />
+    <rosparam subst_value="true">
+      use_rgb: true
+    </rosparam>
+    <rosparam command="load" file="$(arg SELF_FILTER_PARAM)" />
+  </node>
+
+  <!-- filter hands and knees -->
+  <node pkg="jsk_path_planner" type="robot_bbox_publisher.py"
+        name="robot_bbox_publisher" output="screen" >
+    <param name="transport_object" value="none" />
+  </node>
+
+  <node name="rviz" pkg="rviz" type="rviz"
+        args="-d $(find jsk_path_planner)/rviz/realtime_steppable_region.rviz"
+        output="screen" if="$(arg rviz)"/>
+</launch>
