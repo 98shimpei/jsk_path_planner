@@ -76,11 +76,258 @@ Visualization Manager:
       Size (Pixels): 3
       Size (m): 0.00999999978
       Style: Flat Squares
-      Topic: /assembled_pointcloud2_filtered
+      Topic: /assembled_pointcloud2
       Unreliable: false
       Use Fixed Frame: true
       Use rainbow: true
       Value: true
+    - Class: jsk_rviz_plugin/BoundingBox
+      Enabled: true
+      Name: BoundingBox
+      Topic: /robot_bbox_sf
+      Unreliable: false
+      Value: true
+      alpha: 0.400000006
+      color: 25; 255; 0
+      coloring: Flat color
+      line width: 0.00499999989
+      only edge: false
+      show coords: false
+    - Alpha: 1
+      Class: rviz/RobotModel
+      Collision Enabled: false
+      Enabled: true
+      Links:
+        All Links Enabled: true
+        BODY:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        CHEST_LINK0:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        CHEST_LINK1:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        CHEST_LINK2:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        Expand Joint Details: false
+        Expand Link Details: false
+        Expand Tree: false
+        HEAD_LINK0:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        HEAD_LINK1:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        LARM_FINGER0:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        LARM_FINGER1:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        LARM_LINK0:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        LARM_LINK1:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        LARM_LINK2:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        LARM_LINK3:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        LARM_LINK4:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        LARM_LINK5:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        LARM_LINK6:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        LARM_LINK7:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        LLEG_LINK0:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        LLEG_LINK1:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        LLEG_LINK2:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        LLEG_LINK3:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        LLEG_LINK4:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        LLEG_LINK5:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        Link Tree Style: Links in Alphabetic Order
+        RANGE_LINK:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        RARM_FINGER0:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        RARM_FINGER1:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        RARM_LINK0:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        RARM_LINK1:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        RARM_LINK2:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        RARM_LINK3:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        RARM_LINK4:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        RARM_LINK5:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        RARM_LINK6:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        RARM_LINK7:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        RLEG_LINK0:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        RLEG_LINK1:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        RLEG_LINK2:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        RLEG_LINK3:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        RLEG_LINK4:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        RLEG_LINK5:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        head_end_coords:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        head_root:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        larm_end_coords:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        lleg_end_coords:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        rarm_end_coords:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        rleg_end_coords:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+      Name: RobotModel
+      Robot Description: robot_description
+      TF Prefix: ""
+      Update Interval: 0
+      Value: true
+      Visual Enabled: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
@@ -121,10 +368,10 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.00999999978
-      Pitch: 0.785398006
+      Pitch: 0.490397722
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 0.785398006
+      Yaw: 0.885397851
     Saved: ~
 Window Geometry:
   Displays:

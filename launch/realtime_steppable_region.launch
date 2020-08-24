@@ -2,24 +2,17 @@
 
   <arg name="rviz" default="true" />
   <arg name="SELF_FILTER_PARAM" value="$(find hrpsys_choreonoid_tutorials)/config/jaxon_self_filter.yaml" />
+  <arg name="NODELET_MANAGER_NAME" default="self_filter_nodelet"/>
+  <arg name="NODELET_INDEX"        default="0"/>
+  <arg name="ROBOT_FRAME"  default="body_on_odom" />
 
   <rosparam param="/use_sim_time">true</rosparam>
-
-  <node type="point_cloud2_assembler" pkg="laser_assembler"
-        name="chest_camera_assembler">
-    <remap from="cloud" to="/chest_camera/depth_registered/points"/>
-    <param name="max_clouds" type="int" value="400" />
-    <!-- <param name="fixed_frame" type="string" value="d435_color_optical_frame" /> -->
-    <param name="fixed_frame" type="string" value="map" />
-  </node>
-
-  <node name="assembled_pointcloud_publisher" pkg="jsk_path_planner" type="publish_assembled_pointcloud2.py" />
 
   <!-- self filter -->
   <node pkg="robot_self_filter" type="self_filter"
         name="chest_pointcloud_self_filter" output="screen">
-    <remap from="cloud_in"  to="/assembled_pointcloud2" />
-    <remap from="cloud_out" to="/assembled_pointcloud2_filtered" />
+    <remap from="cloud_in"  to="/chest_camera/depth_registered/points" />
+    <remap from="cloud_out" to="/chest_camera/depth_registered/points_filtered" />
     <rosparam subst_value="true">
       use_rgb: true
     </rosparam>
@@ -27,11 +20,61 @@
   </node>
 
   <!-- filter hands and knees -->
-  <node pkg="jsk_path_planner" type="robot_bbox_publisher.py"
-        name="robot_bbox_publisher" output="screen" >
-    <param name="transport_object" value="none" />
+
+  <!-- manager -->
+  <node pkg="jsk_topic_tools" type="standalone_complexed_nodelet"
+        name="$(arg NODELET_MANAGER_NAME)" output="screen" />
+
+  <node pkg="jsk_path_planner" type="robot_bbox_sf_publisher.py"
+        name="robot_bbox_sf_publisher" output="screen"/>
+
+  <group ns="$(arg NODELET_MANAGER_NAME)">
+    <rosparam subst_value="true">
+      nodelets_$(arg NODELET_INDEX):
+        - name: robot_center_pointcloud_sf
+          type: jsk_pcl/TfTransformCloud
+          remappings:
+            - from: ~input
+              to: /chest_camera/depth_registered/points_filtered
+        - name: robot_bbox_clipper_sf
+          type: jsk_pcl/AttentionClipper
+          remappings:
+            - from: ~input/points
+              to: /robot_center_pointcloud_sf/output
+            - from: ~input/box
+              to: /robot_bbox_sf
+        - name: robot_center_pointcloud_bbox_clipped_sf
+          type: jsk_pcl/ExtractIndices
+          remappings:
+            - from: ~input
+              to: /robot_center_pointcloud_sf/output
+            - from: ~indices
+              to: /robot_bbox_clipper_sf/output/point_indices
+    </rosparam>
+  </group>
+
+  <rosparam param="robot_center_pointcloud_sf" subst_value="true">
+    target_frame_id: $(arg ROBOT_FRAME)
+  </rosparam>
+  <rosparam param="robot_bbox_clipper_sf" subst_value="true">
+    use_multiple_attention: false
+    frame_id: $(arg ROBOT_FRAME)
+  </rosparam>
+  <rosparam param="robot_center_pointcloud_bbox_clipped_sf" subst_value="true">
+    negative: true
+  </rosparam>
+
+  <!-- accumulate pointcloud -->
+  <node type="point_cloud2_assembler" pkg="laser_assembler"
+        name="chest_camera_assembler">
+    <remap from="cloud" to="/robot_center_pointcloud_bbox_clipped_sf/output"/>
+    <param name="max_clouds" type="int" value="400" />
+    <param name="fixed_frame" type="string" value="map" />
   </node>
 
+  <node name="assembled_pointcloud_publisher" pkg="jsk_path_planner" type="publish_assembled_pointcloud2.py" />
+
+  <!-- visualize -->
   <node name="rviz" pkg="rviz" type="rviz"
         args="-d $(find jsk_path_planner)/rviz/realtime_steppable_region.rviz"
         output="screen" if="$(arg rviz)"/>
