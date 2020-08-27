@@ -5,13 +5,22 @@
   <arg name="NODELET_MANAGER_NAME" default="self_filter_nodelet"/>
   <arg name="NODELET_INDEX"        default="0"/>
   <arg name="ROBOT_FRAME"  default="body_on_odom" />
+  <arg name="INPUT_POINTCLOUD_RATE" default="1"/>
 
   <rosparam param="/use_sim_time">true</rosparam>
+
+  <!-- pointcloud pub regulator -->
+  <node pkg="jsk_path_planner" type="pointcloud_pub_regulator.py"
+        name="pointcloud_pub_regulator" output="screen">
+    <remap from="~input"  to="/chest_camera/depth_registered/points" />
+    <remap from="~output" to="/chest_camera/depth_registered/points_low_hz" />
+    <param name="rate" value="$(arg INPUT_POINTCLOUD_RATE)" />
+  </node>
 
   <!-- self filter -->
   <node pkg="robot_self_filter" type="self_filter"
         name="chest_pointcloud_self_filter" output="screen">
-    <remap from="cloud_in"  to="/chest_camera/depth_registered/points" />
+    <remap from="cloud_in"  to="/chest_camera/depth_registered/points_low_hz" />
     <remap from="cloud_out" to="/chest_camera/depth_registered/points_filtered" />
     <rosparam subst_value="true">
       use_rgb: true
