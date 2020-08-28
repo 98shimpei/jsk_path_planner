@@ -4,20 +4,11 @@
   <arg name="ROBOT_FRAME"  default="body_on_odom" />
   <arg name="NODELET_MANAGER_NAME" default="recognize_steppable_region_nodelet"/>
 
-  <param name="robot_description" textfile="$(find hrpsys_choreonoid_tutorials)/models/JAXON_JVRC_SENSORS.urdf" />
+  <!-- <param name="robot_description" textfile="$(find hrpsys_choreonoid_tutorials)/models/JAXON_JVRC_SENSORS.urdf" /> -->
 
   <node name="$(arg NODELET_MANAGER_NAME)"
         pkg="nodelet" type="nodelet"
         args="manager"/>
-
-  <!-- <node name="organized_multi_plane_segmentation" -->
-  <!--       pkg="nodelet" type="nodelet" -->
-  <!--       args="load jsk_pcl/OrganizedMultiPlaneSegmentation $(arg NODELET_MANAGER_NAME)"> -->
-  <!--   <remap from="~input" to="/assembled_pointcloud2"/> -->
-  <!--   <rosparam> -->
-  <!--     publish_normal: true -->
-  <!--   </rosparam> -->
-  <!-- </node> -->
 
   <node pkg="nodelet" type="nodelet" name="robot_center_assembled_pointcloud"
         args="load jsk_pcl/TfTransformCloud $(arg NODELET_MANAGER_NAME)" output="screen">
@@ -64,38 +55,38 @@
     </rosparam>
   </node>
 
-  <node name="multi_plane_sac_segmentation"
+  <!-- make static virtual camera -->
+  <node name="static_virtual_camera"
+        pkg="jsk_path_planner" type="static_virtual_camera.py"
+        output="screen" />
+  <node pkg="tf" type="static_transform_publisher" name="virtual_camera_broadcaster"
+        args="0.8 0.0 12 -0.707107 0.707017 0.0 0.0 BODY static_virtual_camera 100" />
+
+  <!-- organize pointcloud -->
+  <node name="depth_image_creator"
         pkg="nodelet" type="nodelet"
-        args="load jsk_pcl/MultiPlaneSACSegmentation $(arg NODELET_MANAGER_NAME)">
-    <!-- <remap from="~input" to="/kinect_head/depth_registered/points"/> -->
-    <!-- <remap from="~input" to="/assembled_pointcloud2"/> -->
-    <remap from="~input" to="/voxel_grid_y/output"/>
+        args="load jsk_pcl/DepthImageCreator /$(arg NODELET_MANAGER_NAME)">
+    <remap from="~input" to="/voxel_grid_y/output" />
+    <remap from="~info" to="/static_virtual_camera/camera_info" />
     <rosparam>
-      use_normal: false
-      use_clusters: false
-      use_imu_parallel: false
-      use_imu_perpendicular: false
+      use_approximate: True
+      max_queue_size: 3
+      max_pub_queue_size: 1
+      max_sub_queue_size: 1
+      organize_cloud: True
     </rosparam>
   </node>
 
-  <node name="dynparam_loader"
-        pkg="dynamic_reconfigure" type="dynparam"
-        args="load /multi_plane_sac_segmentation $(find jsk_path_planner)/config/multi_plane_sac_segmentation.yaml"/>
-
-  <node name="cluster_indices_decomposer"
+  <!-- multi plane segmentation -->
+  <node name="organized_multi_plane_segmentation"
         pkg="nodelet" type="nodelet"
-        args="load jsk_pcl/ClusterPointIndicesDecomposer $(arg NODELET_MANAGER_NAME)">
-    <!-- <remap from="~input" to="/kinect_head/depth_registered/points"/> -->
-    <!-- <remap from="~input" to="/assembled_pointcloud2"/> -->
-    <remap from="~input" to="/voxel_grid_y/output"/>
-    <remap from="~target" to="multi_plane_sac_segmentation/output_indices"/>
+        args="load jsk_pcl/OrganizedMultiPlaneSegmentation $(arg NODELET_MANAGER_NAME)">
+    <remap from="~input" to="/depth_image_creator/output_cloud"/>
+    <rosparam>
+      publish_normal: true
+    </rosparam>
   </node>
 
-  <!-- visualize -->
-  <!-- <node name="rviz" -->
-  <!--       pkg="rviz" type="rviz" -->
-  <!--       args="-d $(find jsk_pcl_ros)/sample/rviz/multi_plane_sac_segmentation.rviz"> -->
-  <!-- </node> -->
   <node name="rviz" pkg="rviz" type="rviz"
         args="-d $(find jsk_path_planner)/rviz/realtime_steppable_region.rviz"
         output="screen" if="$(arg rviz)"/>

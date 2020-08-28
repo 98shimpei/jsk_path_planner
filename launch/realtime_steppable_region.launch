@@ -83,6 +83,11 @@
 
   <node name="assembled_pointcloud_publisher" pkg="jsk_path_planner" type="publish_assembled_pointcloud2.py" />
 
+  <!-- multiplane recognition -->
+  <include file="$(find jsk_path_planner)/launch/recognize_steppable_region.launch">
+    <arg name="rviz"  value="false" />
+  </include>
+
   <!-- visualize -->
   <node name="rviz" pkg="rviz" type="rviz"
         args="-d $(find jsk_path_planner)/rviz/realtime_steppable_region.rviz"
