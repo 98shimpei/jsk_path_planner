@@ -9,12 +9,12 @@ def assembled_pointcloud2_publisher():
     pub = rospy.Publisher("/assembled_pointcloud2", msg_PointCloud2, queue_size=1)
     rospy.init_node("assembled_pointcloud2_publisher", anonymous=True)
     rospy.wait_for_service("assemble_scans2")
-    r = rospy.Rate(5) # 5hz
+    r = rospy.Rate(1) # 1hz
 
     while not rospy.is_shutdown():
         try:
             end = rospy.Time.now()
-            begin = rospy.Time(end.secs-3, end.nsecs)
+            begin = rospy.Time(end.secs-5, end.nsecs)
             srv = rospy.ServiceProxy("/assemble_scans2", srv_AssembleScans2)
             res = srv(begin, end)
             pub.publish(res.cloud)

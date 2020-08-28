@@ -52,5 +52,5 @@ if __name__ == '__main__':
     # info_msg.R = [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0]
     # info_msg.P = [471.903168, 0.0, 386.903326, 0.0, 0.0, 489.443268, 248.733955, 0.0, 0.0, 0.0, 1.0, 0.0]
 
-    rospy.Timer(rospy.Duration(1.0/10), timer_cb)
+    rospy.Timer(rospy.Duration(1.0/1), timer_cb)
     rospy.spin()
