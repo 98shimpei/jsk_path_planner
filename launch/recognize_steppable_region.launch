@@ -65,11 +65,11 @@
   <!-- organize pointcloud -->
   <node name="depth_image_creator"
         pkg="nodelet" type="nodelet"
-        args="load jsk_pcl/DepthImageCreator /$(arg NODELET_MANAGER_NAME)">
+        args="load jsk_pcl/DepthImageCreator $(arg NODELET_MANAGER_NAME)">
     <remap from="~input" to="/voxel_grid_y/output" />
     <remap from="~info" to="/static_virtual_camera/camera_info" />
     <rosparam>
-      use_approximate: True
+      use_asynchronous: True
       max_queue_size: 3
       max_pub_queue_size: 1
       max_sub_queue_size: 1
