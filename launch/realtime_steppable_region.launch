@@ -4,7 +4,8 @@
   <arg name="SELF_FILTER_PARAM" value="$(find hrpsys_choreonoid_tutorials)/config/jaxon_self_filter.yaml" />
   <arg name="NODELET_MANAGER_NAME" default="self_filter_nodelet"/>
   <arg name="NODELET_INDEX"        default="0"/>
-  <arg name="ROBOT_FRAME"  default="body_on_odom" />
+  <!-- <arg name="ROBOT_FRAME"  default="body_on_odom" /> -->
+  <arg name="ROBOT_FRAME"  default="BODY" />
   <arg name="INPUT_POINTCLOUD_RATE" default="1"/>
 
   <rosparam param="/use_sim_time">true</rosparam>

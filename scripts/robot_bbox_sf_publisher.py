@@ -9,9 +9,10 @@ p = rospy.Publisher("/robot_bbox_sf", BoundingBox, queue_size=10)
 r = rospy.Rate(100)
 
 bbox_msg = BoundingBox()
-bbox_msg.header.frame_id = 'body_on_odom'
+# bbox_msg.header.frame_id = 'body_on_odom'
+bbox_msg.header.frame_id = 'BODY'
 
-position = Point(0.0, 0.0, 1.0)
+position = Point(0.0, 0.0, 0.0)
 orientation = Quaternion(0.0, 0.0, 0.0, 0.0)
 dimensions = Vector3(0.8, 1.6, 1.6)
 
