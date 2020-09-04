@@ -79,7 +79,9 @@
         name="chest_camera_assembler">
     <remap from="cloud" to="/robot_center_pointcloud_bbox_clipped_sf/output"/>
     <param name="max_clouds" type="int" value="400" />
-    <param name="fixed_frame" type="string" value="map" />
+    <!-- <param name="fixed_frame" type="string" value="map" /> -->
+    <!-- <param name="fixed_frame" type="string" value="odom" /> -->
+    <param name="fixed_frame" type="string" value="viso_odom" />
   </node>
 
   <node name="assembled_pointcloud_publisher" pkg="jsk_path_planner" type="publish_assembled_pointcloud2.py" />
