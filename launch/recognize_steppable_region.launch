@@ -127,7 +127,11 @@
     <remap from="~input" to="/depth_image_creator/output_cloud" unless="$(arg USE_HEIGHTMAP)"/>
     <remap from="~input" to="/rt_filtered_heightmap_pointcloud/output" if="$(arg USE_HEIGHTMAP)"/>
     <rosparam>
-      min_size: 300
+      min_size: 600
+      distance_threshold: 0.01
+      angular_threshold: 0.001
+      ransac_refine_outlier_distance_threshold: 0.3
+      max_depth_change_factor: 0.01
       publish_normal: true
     </rosparam>
   </node>
