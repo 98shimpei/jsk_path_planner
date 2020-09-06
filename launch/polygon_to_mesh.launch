@@ -1,0 +1,6 @@
+<launch>
+  <node pkg="jsk_path_planner" type="polygon-to-mesh.l"
+        name="polygon_to_mesh" output="screen">
+    <remap from="~input" to="/organized_multi_plane_segmentation/output_polygon" />
+  </node>
+</launch>
