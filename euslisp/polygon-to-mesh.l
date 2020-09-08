@@ -29,6 +29,19 @@
   (instance face :init :vertices vertices)
   )
 
+(defun change-face-size (f margin)
+  (setq centroid (second (send f :centroid)))
+  (setq vertices (send f :vertices))
+  (setq new-vertices (list))
+  (dotimes (i (- (length vertices) 1))
+    (setq v (v- (elt vertices i) centroid))
+    (setq new-point (v+ (elt vertices i)
+                        (scale (/ margin (norm v)) v)))
+    (setq new-vertices (nconc new-vertices (list new-point)))
+    )
+  (instance face :init :vertices new-vertices)
+  )
+
 (defun callback(msg)
 
   (setq header (send msg :header))
@@ -42,15 +55,16 @@
   (dotimes (i (length sorted-polygons))
     (setq base-face (polygon-msg-to-face (elt sorted-polygons i)))
     ;; make base face smaller
-    ;; (setq base-face (change-face-size base-face -3))
+    (setq base-face (change-face-size base-face -0.03))
     (ros::ros-info "i: ~A  area: ~A" i (send base-face :area))
     (when (> i 0)
       (dotimes (j i)
         (setq upper-face (polygon-msg-to-face (elt sorted-polygons j)))
         (ros::ros-info "  j: ~A  area: ~A" j (send upper-face :area))
         ;; make hole larger
-        ;; (setq upper-face (change-face-size upper-face 3))
+        (setq upper-face (change-face-size upper-face 0.03))
         ;; (setq common-face (car (face* base-face upper-face)))
+        (setq common-face nil)
         (setq common-face (face* base-face upper-face))
         (when (eq (find :area (send common-face :methods)) nil)
           (setq common-face (car common-face))
