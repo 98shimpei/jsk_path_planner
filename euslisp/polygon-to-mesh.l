@@ -16,6 +16,19 @@
 (defun compare-plane-height (a b)
   (> (calc-plane-height a) (calc-plane-height b)))
 
+(defun polygon-msg-to-face (polygon)
+  (setq points (send (send polygon :polygon) :points))
+  (setq vertices (list))
+  (dotimes (i (length points))
+    (setq new-point (float-vector
+                     (send (elt points i) :x)
+                     (send (elt points i) :y)
+                     0))
+    (setq vertices (nconc vertices (list new-point)))
+    )
+  (instance face :init :vertices vertices)
+  )
+
 (defun callback(msg)
 
   (setq header (send msg :header))
@@ -27,11 +40,30 @@
         )
 
   (dotimes (i (length sorted-polygons))
-    ;; find upper polygons
-
-    ;; connect upper polygons
-
-    ;; make plane with holes
+    (setq base-face (polygon-msg-to-face (elt sorted-polygons i)))
+    ;; make base face smaller
+    ;; (setq base-face (change-face-size base-face -3))
+    (format t "i: ~A  area: ~A~%" i (send base-face :area))
+    (when (> i 0)
+      (dotimes (j i)
+        (setq upper-face (polygon-msg-to-face (elt sorted-polygons j)))
+        (format t "  j: ~A  area: ~A~%" j (send upper-face :area))
+        ;; make hole larger
+        ;; (setq upper-face (change-face-size upper-face 3))
+        ;; (setq common-face (car (face* base-face upper-face)))
+        (setq common-face (face* base-face upper-face))
+        (when (eq (find :area (send common-face :methods)) nil)
+          (setq common-face (car common-face))
+          )
+        ;; remove common face as hole
+        (when (not (eq common-face nil))
+          ;; set common face as hole
+          (format t "  j: ~A  common area: ~A~%" j (send common-face :area))
+          (send base-face :enter-hole common-face)
+          (format t "  j: ~A  removed area: ~A~%" j (send base-face :area))
+          )
+        )
+      )
 
     ;; make triangle meshes
     )
