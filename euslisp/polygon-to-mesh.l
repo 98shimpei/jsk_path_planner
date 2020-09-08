@@ -43,11 +43,11 @@
     (setq base-face (polygon-msg-to-face (elt sorted-polygons i)))
     ;; make base face smaller
     ;; (setq base-face (change-face-size base-face -3))
-    (format t "i: ~A  area: ~A~%" i (send base-face :area))
+    (ros::ros-info "i: ~A  area: ~A" i (send base-face :area))
     (when (> i 0)
       (dotimes (j i)
         (setq upper-face (polygon-msg-to-face (elt sorted-polygons j)))
-        (format t "  j: ~A  area: ~A~%" j (send upper-face :area))
+        (ros::ros-info "  j: ~A  area: ~A" j (send upper-face :area))
         ;; make hole larger
         ;; (setq upper-face (change-face-size upper-face 3))
         ;; (setq common-face (car (face* base-face upper-face)))
@@ -58,9 +58,9 @@
         ;; remove common face as hole
         (when (not (eq common-face nil))
           ;; set common face as hole
-          (format t "  j: ~A  common area: ~A~%" j (send common-face :area))
+          (ros::ros-info "  j: ~A  common area: ~A" j (send common-face :area))
           (send base-face :enter-hole common-face)
-          (format t "  j: ~A  removed area: ~A~%" j (send base-face :area))
+          (ros::ros-info "  j: ~A  removed area: ~A" j (send base-face :area))
           )
         )
       )
@@ -74,7 +74,7 @@
                   :init :header header :polygons sorted-polygons))
 
   (ros::publish "~sorted_polygons" polygon-array-msg)
-  (format t "published~%")
+  (ros::ros-info "published")
   ) ;; defun
 
 (ros::roseus "polygon_to_mesh")
