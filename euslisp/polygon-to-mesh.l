@@ -127,9 +127,12 @@
   ;; prepare ouput triangles list
   (setq triangles (list))
 
-  (dotimes (i (length sorted-polygons))
+  (setq i -1)
+  (while t
+    (if (>= i (- (length sorted-polygons) 1)) (return))
     (tagbody
      dotimes-i-top
+     (incf i)
      (setq base-face (polygon-msg-to-face (elt sorted-polygons i)))
      ;; make base face smaller
      (setq base-face (change-face-size base-face -0.03))
@@ -140,14 +143,16 @@
      ;; skip small polygon
      (when (< (send base-face :area) 0.01)
        (ros::ros-info "i: ~A  area is too small" i)
-       (incf i)
        (go dotimes-i-top)
        )
 
      (when (> i 0)
-       (dotimes (j i)
+       (setq j -1)
+       (while t
          (tagbody
           dotimes-j-top
+          (incf j)
+          (if (>= j i) (return))
           (setq upper-face (polygon-msg-to-face (elt sorted-polygons j)))
           (ros::ros-info "  j: ~A  area: ~A" j (send upper-face :area))
           ;; make hole larger
@@ -167,7 +172,6 @@
                   (ros::ros-info "  j: ~A  cast common area type" j))
               (progn
                 (ros::ros-error "  j: ~A  common area type error" j)
-                (incf j)
                 (go dotimes-j-top)))
             )
 
