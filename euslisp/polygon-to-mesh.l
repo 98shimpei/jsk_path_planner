@@ -42,6 +42,42 @@
   (instance face :init :vertices new-vertices)
   )
 
+(defun make-triangles-msg (header triangles)
+  ;; prepare polygon stamped msg list
+  (setq polygons-msg (list))
+
+  ;; add polygon stamped msg to list
+  (dotimes (i (length triangles))
+    ;; get triangle's vertices
+    (setq vertices (send (elt triangles i) :vertices))
+
+    ;; prepare point msg list
+    (setq points-msg (list))
+
+    ;; add point msg to list
+    (dotimes (j 3)
+      (setq points-msg
+            (nconc points-msg (list (instance geometry_msgs::Point32 :init
+                                              :x (float (elt (elt vertices j) 0))
+                                              :y (float (elt (elt vertices j) 1))
+                                              :z 0))))
+      )
+
+    ;; make polygon stamped msg and add it to the list
+    (setq polygon-stamped-msg
+          (instance geometry_msgs/PolygonStamped :init
+                    :header header
+                    :polygon (instance geometry_msgs::Polygon :init
+                                       :points points-msg)))
+    (setq polygons-msg (nconc polygons-msg (list polygon-stamped-msg)))
+    )
+
+  ;; return polygon array msg
+  (instance jsk_recognition_msgs::PolygonArray :init
+            :header header
+            :polygons polygons-msg)
+  )
+
 (defun callback(msg)
 
   (setq header (send msg :header))
@@ -52,11 +88,21 @@
         (sort (copy-list polygons) 'compare-plane-height)
         )
 
+  ;; prepare ouput triangles list
+  (setq triangles (list))
+
   (dotimes (i (length sorted-polygons))
     (setq base-face (polygon-msg-to-face (elt sorted-polygons i)))
     ;; make base face smaller
     (setq base-face (change-face-size base-face -0.03))
     (ros::ros-info "i: ~A  area: ~A" i (send base-face :area))
+
+    ;; skip small polygon
+    (when (< (send base-face :area) 0.01)
+      (ros::ros-info "i: ~A  area is too small" i)
+      (return)
+      )
+
     (when (> i 0)
       (dotimes (j i)
         (setq upper-face (polygon-msg-to-face (elt sorted-polygons j)))
@@ -66,9 +112,19 @@
         ;; (setq common-face (car (face* base-face upper-face)))
         (setq common-face nil)
         (setq common-face (face* base-face upper-face))
-        (when (eq (find :area (send common-face :methods)) nil)
-          (setq common-face (car common-face))
+
+        ;; cast common-face if it is cons type
+        (when (eq (class common-face) (class (list 1)))
+          (ros::ros-info "  j: ~A  common area type is cons" j)
+          (if (eq (class (car common-face)) (class base-face))
+              (progn
+                (setq common-face (car common-face))
+                (ros::ros-info "  j: ~A  cast common area type" j))
+            (progn
+              (ros::ros-error "  j: ~A  common area type error" j)
+              (return)))
           )
+
         ;; remove common face as hole
         (when (not (eq common-face nil))
           ;; set common face as hole
@@ -79,8 +135,19 @@
         )
       )
 
-    ;; make triangle meshes
+    ;; make triangle meshes and add them to list
+    (ros::ros-info "make triangles from base-face")
+    (ros::ros-info "base-face type ~A" (class base-face))
+    (ros::ros-info "base face vertices: ~A" (length (send base-face :vertices)))
+    (ros::ros-info "base face holes: ~A" (length (send base-face :holes)))
+    (print (send base-face :holes))
+    (setq triangles (nconc triangles (geometry::face-to-triangle base-face)))
+    (ros::ros-info "make triangles from base-face  length: ~A"
+      (length (geometry::face-to-triangle base-face)))
     )
+
+  ;; make polygon array msg of triangle meshes
+  (setq triangles-msg (make-triangles-msg header triangles))
 
   ;; publish sorted-polygons for debug
   (setq polygon-array-msg
@@ -88,6 +155,7 @@
                   :init :header header :polygons sorted-polygons))
 
   (ros::publish "~sorted_polygons" polygon-array-msg)
+  (ros::publish "~meshed_polygons" triangles-msg)
   (ros::ros-info "published")
   ) ;; defun
 
@@ -97,6 +165,8 @@
 
 ;; for debug
 (ros::advertise "~sorted_polygons" jsk_recognition_msgs::PolygonArray 1)
+
+(ros::advertise "~meshed_polygons" jsk_recognition_msgs::PolygonArray 1)
 
 (do-until-key
  (ros::spin-once))
