@@ -127,76 +127,55 @@
   ;; prepare ouput triangles list
   (setq triangles (list))
 
-  (setq i -1)
-  (while t
-    (if (>= i (- (length sorted-polygons) 1)) (return))
-    (tagbody
-     dotimes-i-top
-     (incf i)
-     (setq base-face (polygon-msg-to-face (elt sorted-polygons i)))
-     ;; make base face smaller
-     (setq base-face (change-face-size base-face -0.03))
-     ;; sort base face vertices clockwise
-     (setq base-face (sort-face-vertices-clockwise base-face 1))
-     (ros::ros-info "i: ~A  area: ~A" i (send base-face :area))
+  (dotimes (i (length sorted-polygons))
+    (setq base-face (polygon-msg-to-face (elt sorted-polygons i)))
+    ;; make base face smaller
+    (setq base-face (change-face-size base-face -0.03))
+    ;; sort base face vertices clockwise
+    (setq base-face (sort-face-vertices-clockwise base-face 1))
+    (ros::ros-info "i: ~A  area: ~A" i (send base-face :area))
 
-     ;; skip small polygon
-     (when (< (send base-face :area) 0.01)
-       (ros::ros-info "i: ~A  area is too small" i)
-       (go dotimes-i-top)
-       )
+    ;; skip small polygon
+    (if (< (send base-face :area) 0.01)
+        (ros::ros-info "i: ~A  area is too small" i)
 
-     (when (> i 0)
-       (setq j -1)
-       (while t
-         (tagbody
-          dotimes-j-top
-          (incf j)
-          (if (>= j i) (return))
-          (setq upper-face (polygon-msg-to-face (elt sorted-polygons j)))
-          (ros::ros-info "  j: ~A  area: ~A" j (send upper-face :area))
-          ;; make hole larger
-          (setq upper-face (change-face-size upper-face 0.03))
-          ;; sort upper face vertices clockwise
-          (setq upper-face (sort-face-vertices-clockwise upper-face 1))
-          ;; (setq common-face (car (face* base-face upper-face)))
-          (setq common-face nil)
-          (setq common-face (face* base-face upper-face))
+      ;; else
+      (progn
+        (when (> i 0)
+          (dotimes (j i)
+            (setq upper-face (polygon-msg-to-face (elt sorted-polygons j)))
+            (ros::ros-info "  j: ~A  area: ~A" j (send upper-face :area))
+            ;; make hole larger
+            (setq upper-face (change-face-size upper-face 0.03))
+            ;; sort upper face vertices clockwise
+            (setq upper-face (sort-face-vertices-clockwise upper-face 1))
+            (setq common-faces (face* base-face upper-face))
 
-          ;; cast common-face if it is cons type
-          (when (eq (class common-face) (class (list 1)))
-            (ros::ros-info "  j: ~A  common area type is cons" j)
-            (if (eq (class (car common-face)) (class base-face))
-                (progn
-                  (setq common-face (car common-face))
-                  (ros::ros-info "  j: ~A  cast common area type" j))
-              (progn
-                (ros::ros-error "  j: ~A  common area type error" j)
-                (go dotimes-j-top)))
-            )
+            ;; remove common face as hole
+            (dotimes (k (length common-faces))
+              (setq common-face (elt common-faces k))
+              (when (eq (class common-face) (class base-face))
+                ;; sort common face vertices anticlockwise
+                (ros::ros-info "  j: ~A  common area k: ~A : ~A" j k (send common-face :area))
+                (setq common-face (sort-face-vertices-clockwise common-face -1))
 
-          ;; remove common face as hole
-          (when (not (eq common-face nil))
-            ;; sort common face vertices anticlockwise
-            (setq common-face (sort-face-vertices-clockwise common-face -1))
-            (ros::ros-info "  j: ~A  common area: ~A" j (send common-face :area))
-
-            ;; set common face as hole
-            (setq h (instance hole :init :vertices (cdr (send common-face :vertices))))
-            (send base-face :enter-hole h)
-            (ros::ros-info "  j: ~A  removed area: ~A" j (send base-face :area))
+                ;; set common face as hole
+                (setq h (instance hole :init :vertices (cdr (send common-face :vertices))))
+                (send base-face :enter-hole h)
+                (ros::ros-info "  j: ~A  removed area k: ~A : ~A" j k (send base-face :area))
+                )
+              )
             )
           )
-         )
-       )
+        )
+      )
 
-     ;; make triangle meshes and add them to list
-     (ros::ros-info "base face vertices: ~A" (length (send base-face :vertices)))
-     (ros::ros-info "base face holes: ~A" (length (send base-face :holes)))
-     (setq triangles (nconc triangles (geometry::face-to-triangle base-face)))
-     (ros::ros-info "make triangles from base-face  length: ~A"
-       (length (geometry::face-to-triangle base-face)))
-     )
+    ;; make triangle meshes and add them to list
+    (ros::ros-info "base face vertices: ~A" (length (send base-face :vertices)))
+    (ros::ros-info "base face holes: ~A" (length (send base-face :holes)))
+    (setq triangles (nconc triangles (geometry::face-to-triangle base-face)))
+    (ros::ros-info "make triangles from base-face  length: ~A"
+      (length (geometry::face-to-triangle base-face)))
     )
 
   ;; make polygon array msg of triangle meshes
