@@ -180,14 +180,18 @@
             (dotimes (k (length common-faces))
               (setq common-face (elt common-faces k))
               (when (eq (class common-face) (class base-face))
-                ;; sort common face vertices anticlockwise
-                (ros::ros-info "  j: ~A  common area k: ~A : ~A" j k (send common-face :area))
-                (setq common-face (sort-face-vertices-clockwise common-face -1))
+                ;; length of vertices <= 3 is not face (line or point)
+                (when (> (length (send common-face :vertices)) 3)
+                  ;; sort common face vertices anticlockwise
+                  (ros::ros-info "  j: ~A  common area k: ~A : ~A" j k (send common-face :area))
+                  (ros::ros-info "  vertices: ~A" (length (send common-face :vertices)))
+                  (setq common-face (sort-face-vertices-clockwise common-face -1))
 
-                ;; set common face as hole
-                (setq h (instance hole :init :vertices (cdr (send common-face :vertices))))
-                (send base-face :enter-hole h)
-                (ros::ros-info "  j: ~A  removed area k: ~A : ~A" j k (send base-face :area))
+                  ;; set common face as hole
+                  (setq h (instance hole :init :vertices (cdr (send common-face :vertices))))
+                  (send base-face :enter-hole h)
+                  (ros::ros-info "  j: ~A  removed area k: ~A : ~A" j k (send base-face :area))
+                  )
                 )
               )
             )
