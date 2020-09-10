@@ -78,6 +78,25 @@
   (instance face :init :vertices sorted-vertices)
   )
 
+(defun remove-near-vertices (f margin)
+  (setq vertices (send f :vertices))
+  (setq cleaned-vertices (list (elt vertices 0)))
+  (dotimes (i (- (length vertices) 2))
+    ;; get candidate point
+    (setq cp (elt vertices (+ i 1)))
+    ;; get last added point from cleaned-vertices list
+    (setq lp (car (reverse cleaned-vertices)))
+
+    ;; add cp to cleaned-vertices if it is far enough from lp
+    (when (> (norm (v- cp lp)) margin)
+      (setq cleaned-vertices (nconc cleaned-vertices (list cp)))
+      )
+    )
+
+  ;; return face object
+  (instance face :init :vertices cleaned-vertices)
+  )
+
 (defun make-triangles-msg (header triangles)
   ;; prepare polygon stamped msg list
   (setq polygons-msg (list))
@@ -133,6 +152,8 @@
     (setq base-face (change-face-size base-face -0.03))
     ;; sort base face vertices clockwise
     (setq base-face (sort-face-vertices-clockwise base-face 1))
+    ;; remove near vertices
+    (setq base-face (remove-near-vertices base-face 0.03))
     (ros::ros-info "i: ~A  area: ~A" i (send base-face :area))
 
     ;; skip small polygon
@@ -144,11 +165,15 @@
         (when (> i 0)
           (dotimes (j i)
             (setq upper-face (polygon-msg-to-face (elt sorted-polygons j)))
-            (ros::ros-info "  j: ~A  area: ~A" j (send upper-face :area))
             ;; make hole larger
             (setq upper-face (change-face-size upper-face 0.03))
             ;; sort upper face vertices clockwise
             (setq upper-face (sort-face-vertices-clockwise upper-face 1))
+            ;; remove near vertices
+            (setq upper-face (remove-near-vertices upper-face 0.03))
+            (ros::ros-info "  j: ~A  area: ~A" j (send upper-face :area))
+
+            ;; get common-faces
             (setq common-faces (face* base-face upper-face))
 
             ;; remove common face as hole
