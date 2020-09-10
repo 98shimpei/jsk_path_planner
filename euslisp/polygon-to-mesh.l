@@ -29,6 +29,16 @@
   (instance face :init :vertices vertices)
   )
 
+(defun change-face-scale (f s)
+  (setq vertices (send f :vertices))
+  (setq new-vertices (list))
+  (dotimes (i (- (length vertices) 1))
+    (setq new-point (scale s (elt vertices i)))
+    (setq new-vertices (nconc new-vertices (list new-point)))
+    )
+  (instance face :init :vertices new-vertices)
+  )
+
 (defun change-face-size (f margin)
   (setq centroid (second (send f :centroid)))
   (setq vertices (send f :vertices))
@@ -146,18 +156,26 @@
   ;; prepare ouput triangles list
   (setq triangles (list))
 
+  ;; for debug
+  (setq base-faces (list))
+
+  ;; set face scale
+  (setq face-scale 1000.0)
+
   (dotimes (i (length sorted-polygons))
     (setq base-face (polygon-msg-to-face (elt sorted-polygons i)))
+    ;; scale face size x1000
+    (setq base-face (change-face-scale base-face face-scale))
     ;; make base face smaller
-    (setq base-face (change-face-size base-face -0.03))
+    (setq base-face (change-face-size base-face (* -0.03 face-scale)))
     ;; sort base face vertices clockwise
     (setq base-face (sort-face-vertices-clockwise base-face 1))
     ;; remove near vertices
-    (setq base-face (remove-near-vertices base-face 0.03))
+    (setq base-face (remove-near-vertices base-face (* 0.03 face-scale)))
     (ros::ros-info "i: ~A  area: ~A" i (send base-face :area))
 
     ;; skip small polygon
-    (if (< (send base-face :area) 0.01)
+    (if (< (send base-face :area) (* 0.01 face-scale face-scale))
         (ros::ros-info "i: ~A  area is too small" i)
 
       ;; else
@@ -165,12 +183,14 @@
         (when (> i 0)
           (dotimes (j i)
             (setq upper-face (polygon-msg-to-face (elt sorted-polygons j)))
+            ;; scale face size x1000
+            (setq upper-face (change-face-scale upper-face face-scale))
             ;; make hole larger
-            (setq upper-face (change-face-size upper-face 0.03))
+            (setq upper-face (change-face-size upper-face (* 0.03 face-scale)))
             ;; sort upper face vertices clockwise
             (setq upper-face (sort-face-vertices-clockwise upper-face 1))
             ;; remove near vertices
-            (setq upper-face (remove-near-vertices upper-face 0.03))
+            (setq upper-face (remove-near-vertices upper-face (* 0.03 face-scale)))
             (ros::ros-info "  j: ~A  area: ~A" j (send upper-face :area))
 
             ;; get common-faces
@@ -199,6 +219,9 @@
         )
       )
 
+    ;; for debug
+    (setq base-faces (nconc base-faces (list base-face)))
+
     ;; make triangle meshes and add them to list
     (ros::ros-info "base face vertices: ~A" (length (send base-face :vertices)))
     (ros::ros-info "base face holes: ~A" (length (send base-face :holes)))
@@ -206,6 +229,10 @@
     (ros::ros-info "make triangles from base-face  length: ~A"
       (length (geometry::face-to-triangle base-face)))
     )
+
+  ;; change face scale to original
+  (dotimes (i (length triangles))
+    (setf (elt triangles i) (change-face-scale (elt triangles i) (/ 1 face-scale))))
 
   ;; make polygon array msg of triangle meshes
   (setq triangles-msg (make-triangles-msg header triangles))
@@ -218,6 +245,11 @@
   (ros::publish "~sorted_polygons" polygon-array-msg)
   (ros::publish "~meshed_polygons" triangles-msg)
   (ros::ros-info "published")
+
+  ;; debug viewer
+  (setq fs (instance faceset :init :faces base-faces))
+  (objects (list fs))
+
   ) ;; defun
 
 (ros::roseus "polygon_to_mesh")
