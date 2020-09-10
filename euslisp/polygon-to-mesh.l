@@ -56,7 +56,6 @@
   (setq x (elt v 0))
   (setq y (elt v 1))
   (setq theta (atan y x))
-  (if (< x 0) (setq theta (+ theta pi)))
   theta
   )
 
@@ -195,6 +194,9 @@
 
             ;; get common-faces
             (setq common-faces (face* base-face upper-face))
+            ;; cast common-faces type to list
+            (if (not (eq (class common-faces) (class (list 1))))
+                (setq common-faces (list common-faces)))
 
             ;; remove common face as hole
             (dotimes (k (length common-faces))
