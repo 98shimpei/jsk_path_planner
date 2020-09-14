@@ -1,6 +1,7 @@
 #!/usr/bin/env roseus
 
 (ros::roseus-add-msgs "jsk_recognition_msgs")
+(ros::roseus-add-msgs "safe_footstep_planner")
 
 (defun calc-plane-height (polygon)
   ;; calc z mean of points
@@ -142,6 +143,37 @@
             :polygons polygons-msg)
   )
 
+(defun make-sf-triangles-msg (triangles)
+  ;; prepare polygon stamped msg list
+  (setq polygons-msg (list))
+
+  ;; add polygon stamped msg to list
+  (dotimes (i (length triangles))
+    ;; get triangle's vertices
+    (setq vertices (send (elt triangles i) :vertices))
+
+    ;; prepare point msg list
+    (setq points-msg (list))
+
+    ;; add point msg to list
+    (dotimes (j 3)
+      (setq points-msg
+            (nconc points-msg (list (instance geometry_msgs::Point32 :init
+                                              :x (float (elt (elt vertices j) 0))
+                                              :y (float (elt (elt vertices j) 1))
+                                              :z 0))))
+      )
+
+    ;; make polygon msg and add it to the list
+    (setq polygon-msg (instance geometry_msgs::Polygon :init :points points-msg))
+    (setq polygons-msg (nconc polygons-msg (list polygon-msg)))
+    )
+
+  ;; return polygon array msg
+  (instance safe_footstep_planner::PolygonArray :init
+            :polygons polygons-msg)
+  )
+
 (defun callback(msg)
 
   (setq header (send msg :header))
@@ -236,8 +268,11 @@
   (dotimes (i (length triangles))
     (setf (elt triangles i) (change-face-scale (elt triangles i) (/ 1 face-scale))))
 
-  ;; make polygon array msg of triangle meshes
+  ;; make polygon array msg of triangle meshes (jsk_recognition_msgs/PolyogonArray)
   (setq triangles-msg (make-triangles-msg header triangles))
+
+  ;; make polygon array msg of triangle meshes (safe_footstep_planner/PolygonArray)
+  (setq triangles-sf-msg (make-sf-triangles-msg triangles))
 
   ;; publish sorted-polygons for debug
   (setq polygon-array-msg
@@ -246,11 +281,12 @@
 
   (ros::publish "~sorted_polygons" polygon-array-msg)
   (ros::publish "~meshed_polygons" triangles-msg)
+  (ros::publish "/meshed_polygons" triangles-sf-msg)
   (ros::ros-info "published")
 
   ;; debug viewer
-  (setq fs (instance faceset :init :faces base-faces))
-  (objects (list fs))
+  ;; (setq fs (instance faceset :init :faces base-faces))
+  ;; (objects (list fs))
 
   ) ;; defun
 
@@ -262,6 +298,7 @@
 (ros::advertise "~sorted_polygons" jsk_recognition_msgs::PolygonArray 1)
 
 (ros::advertise "~meshed_polygons" jsk_recognition_msgs::PolygonArray 1)
+(ros::advertise "/meshed_polygons" safe_footstep_planner::PolygonArray 1)
 
 (do-until-key
  (ros::spin-once))
