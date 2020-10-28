@@ -1,0 +1,36 @@
+<launch>
+  <arg name="rviz" default="true" />
+  <arg name="init" default="true" />
+
+  <!-- move base -->
+  <include file="$(find jsk_path_planner)/launch/example_move_base.launch" >
+    <arg name="biped"               value="false"/>
+    <arg name="no_static_map"       value="true"/>
+    <arg name="base_global_planner" value="navfn/NavfnROS"/>
+    <arg name="base_local_planner"  value="dwa_local_planner/DWAPlannerROS"/>
+    <!-- <arg name="base_local_planner"  value="base_local_planner/TrajectoryPlannerROS"/> -->
+    <arg name="planner_file"        value="$(find jsk_path_planner)/config/planner.yaml" />
+    <arg name="costmap_common_file" value="$(find jsk_path_planner)/config/pr2_costmap_common.yaml" />
+    <arg name="costmap_global_pointcloud_file" value="$(find jsk_path_planner)/config/pr2_costmap_global_pointcloud.yaml" />
+    <arg name="costmap_local_file"             value="$(find jsk_path_planner)/config/pr2_costmap_local.yaml" />
+    <arg name="rviz"                value="false" />
+  </include>
+
+  <!-- add choreonoid_origin frame -->
+  <node pkg="jsk_path_planner" type="publish_choreonoid_origin.py"
+        name="add_choreonoid_origin_frame" />
+
+  <!-- visualize -->
+  <node name="rviz" pkg="rviz" type="rviz"
+        args="-d $(find jsk_path_planner)/rviz/pr2_path_planner.rviz"
+        output="screen" if="$(arg rviz)"/>
+
+  <!-- visited path -->
+  <node pkg="jsk_path_planner" type="visited_path_publisher.py"
+        name="visited_path_publisher" output="screen">
+    <param name="freq" value="5" />
+    <param name="save_time" value="30" />
+    <param name="robot_frame" value="/base_footprint" />
+  </node>
+
+</launch>
