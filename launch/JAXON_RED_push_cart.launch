@@ -1,6 +1,7 @@
 <launch>
   <arg name="rviz" default="true" />
   <arg name="init" default="true" />
+  <arg name="simulation" default="true" />
 
   <!-- move base cart -->
   <include file="$(find jsk_path_planner)/launch/example_move_base.launch" >
@@ -40,7 +41,7 @@
 
   <!-- visualize -->
   <node name="rviz" pkg="rviz" type="rviz"
-        args="-d $(find jsk_path_planner)/config/jaxon_push_cart.rviz"
+        args="-d $(find jsk_path_planner)/rviz/jaxon_push_cart.rviz"
         output="screen" if="$(arg rviz)"/>
 
   <!-- visited path -->

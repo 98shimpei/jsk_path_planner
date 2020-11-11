@@ -1,6 +1,7 @@
 <launch>
   <arg name="rviz" default="true" />
   <arg name="init" default="true" />
+  <arg name="simulation" default="true" />
 
   <!-- move base -->
   <include file="$(find jsk_path_planner)/launch/example_move_base.launch" >
@@ -38,11 +39,11 @@
   </node>
 
   <!-- consider steppable region -->
-  <!-- <include file="$(find jsk_path_planner)/launch/steppable_region_choreonoid.launch" /> -->
+  <include file="$(find jsk_path_planner)/launch/steppable_region_choreonoid.launch" if="$(arg simulation)"/>
 
   <!-- visualize -->
   <node name="rviz" pkg="rviz" type="rviz"
-        args="-d $(find jsk_path_planner)/config/jaxon_path_planner.rviz"
+        args="-d $(find jsk_path_planner)/rviz/jaxon_path_planner.rviz"
         output="screen" if="$(arg rviz)"/>
 
   <!-- visited path -->
