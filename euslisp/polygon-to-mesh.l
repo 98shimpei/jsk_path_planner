@@ -2,6 +2,35 @@
 
 (ros::roseus-add-msgs "jsk_recognition_msgs")
 
+(defun make-local-plane (x-len y-len z header)
+  (setq points-msg (list))
+  (setq points-msg
+        (nconc points-msg (list (instance geometry_msgs::Point32 :init
+                                          :x (float (/ x-len 2))
+                                          :y (float (/ y-len 2))
+                                          :z z))))
+  (setq points-msg
+        (nconc points-msg (list (instance geometry_msgs::Point32 :init
+                                          :x (float (* -1 (/ x-len 2)))
+                                          :y (float (/ y-len 2))
+                                          :z z))))
+  (setq points-msg
+        (nconc points-msg (list (instance geometry_msgs::Point32 :init
+                                          :x (float (* -1 (/ x-len 2)))
+                                          :y (float (* -1 (/ y-len 2)))
+                                          :z z))))
+  (setq points-msg
+        (nconc points-msg (list (instance geometry_msgs::Point32 :init
+                                          :x (float (/ x-len 2))
+                                          :y (float (* -1 (/ y-len 2)))
+                                          :z z))))
+
+  (instance geometry_msgs::PolygonStamped :init
+            :header header
+            :polygon (instance geometry_msgs::Polygon :init
+                               :points points-msg))
+  )
+
 (defun calc-plane-height (polygon)
   ;; calc z mean of points
   (setq points (send (send polygon :polygon) :points))
@@ -147,6 +176,11 @@
   (setq header (send msg :header))
   (setq polygons (send msg :polygons))
 
+  (when (ros::get-param "~add_local_plane" nil)
+    (setq local-plane (make-local-plane 3.0 3.0 0.0 header))
+    (setq polygons (nconc polygons (list local-plane)))
+    )
+
   ;; sort polygons by height mean of points (descending)
   (setq sorted-polygons
         (sort (copy-list polygons) 'compare-plane-height)
@@ -250,7 +284,7 @@
 
   ;; debug viewer
   (setq fs (instance faceset :init :faces base-faces))
-  (objects (list fs))
+  ;; (objects (list fs))
 
   ) ;; defun
 
