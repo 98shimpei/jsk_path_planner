@@ -17,7 +17,7 @@
   (setq polygons (send msg :polygons))
 
   (when (ros::get-param "~add_local_plane" nil)
-    (setq local-plane (make-local-plane 1.0 1.0 0.0 header))
+    (setq local-plane (make-local-plane 3.0 3.0 0.0 header))
     (setq polygons (nconc polygons (list local-plane)))
     )
 
@@ -26,10 +26,12 @@
   (setq polygon-array-msg (elt output-msgs 0))
   (setq triangles-msg (elt output-msgs 1))
   (setq triangles-view-msg (elt output-msgs 2))
+  (setq base-faces-view-msg (elt output-msgs 3))
 
   (ros::publish "~sorted_polygons" polygon-array-msg)
   (ros::publish "~meshed_polygons" triangles-msg)
   (ros::publish "~meshed_polygons_view" triangles-view-msg)
+  (ros::publish "~small_polygons_view" base-faces-view-msg)
   (ros::ros-info "published")
 
   ;; debug viewer
@@ -47,6 +49,7 @@
 
 (ros::advertise "~meshed_polygons" safe_footstep_planner::PolygonArray 1)
 (ros::advertise "~meshed_polygons_view" jsk_recognition_msgs::PolygonArray 1)
+(ros::advertise "~small_polygons_view" jsk_recognition_msgs::PolygonArray 1)
 
 (do-until-key
  (ros::spin-once))

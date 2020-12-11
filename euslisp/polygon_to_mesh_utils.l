@@ -184,7 +184,7 @@
     (setq points-msg (list))
 
     ;; add point msg to list
-    (dotimes (j 3)
+    (dotimes (j (- (length vertices) 1))
       (setq points-msg
             (nconc points-msg (list (instance geometry_msgs::Point32 :init
                                               :x (float (elt (elt vertices j) 0))
@@ -263,7 +263,8 @@
     ;; make base face smaller
     ;; (setq base-face (change-face-size base-face (* -0.03 face-scale)))
     ;; (setq base-face (change-face-size base-face (* -0.1 face-scale)))
-    (setq base-face (change-face-size base-face (* -0.1 face-scale) (* 0.08 face-scale)))
+    ;; (setq base-face (change-face-size base-face (* -0.1 face-scale) (* 0.08 face-scale)))
+    (setq base-face (change-face-size base-face (* 0.1 face-scale) (* 0.08 face-scale)))
     ;; sort base face vertices clockwise
     (setq base-face (sort-face-vertices-clockwise base-face 1))
     ;; remove near vertices
@@ -285,7 +286,8 @@
             (setq upper-face (change-face-scale upper-face face-scale))
             ;; make hole larger
             ;; (setq upper-face (change-face-size upper-face (* 0.03 face-scale)))
-            (setq upper-face (change-face-size upper-face (* 0.2 face-scale) (* 0.03 face-scale)))
+            ;; (setq upper-face (change-face-size upper-face (* 0.2 face-scale) (* 0.03 face-scale)))
+            (setq upper-face (change-face-size upper-face (* -0.2 face-scale) (* 0.03 face-scale)))
             ;; sort upper face vertices clockwise
             (setq upper-face (sort-face-vertices-clockwise upper-face 1))
             ;; remove near vertices
@@ -342,11 +344,12 @@
   ;; make polygon array msg of triangle meshes
   (setq triangles-msg (make-triangles-msg header triangles))
   (setq triangles-view-msg (make-polygons-msg header triangles))
+  (setq base-faces-view-msg (make-polygons-msg header base-faces))
 
   ;; publish sorted-polygons for debug
   (setq polygon-array-msg
         (instance jsk_recognition_msgs::PolygonArray
                   :init :header header :polygons sorted-polygons))
 
-  (list polygon-array-msg triangles-msg triangles-view-msg)
+  (list polygon-array-msg triangles-msg triangles-view-msg base-faces-view-msg)
 )
