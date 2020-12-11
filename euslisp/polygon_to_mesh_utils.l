@@ -69,15 +69,50 @@
   (instance face :init :vertices new-vertices)
   )
 
-(defun change-face-size (f margin)
-  (setq centroid (second (send f :centroid)))
-  (setq vertices (send f :vertices))
+;; old function
+;; (defun change-face-size (f margin)
+;;   (setq centroid (second (send f :centroid)))
+;;   (setq vertices (send f :vertices))
+;;   (setq new-vertices (list))
+;;   (dotimes (i (- (length vertices) 1))
+;;     (setq v (v- (elt vertices i) centroid))
+;;     (setq new-point (v+ (elt vertices i)
+;;                         (scale (/ margin (norm v)) v)))
+;;     (setq new-vertices (nconc new-vertices (list new-point)))
+;;     )
+;;   (instance face :init :vertices new-vertices)
+;;   )
+
+;; new function (this func removes near vertices)
+(defun change-face-size (f inner-margin near-margin)
+  (setq vertices (reverse (cdr (reverse (send f :vertices)))))
   (setq new-vertices (list))
-  (dotimes (i (- (length vertices) 1))
-    (setq v (v- (elt vertices i) centroid))
-    (setq new-point (v+ (elt vertices i)
-                        (scale (/ margin (norm v)) v)))
-    (setq new-vertices (nconc new-vertices (list new-point)))
+  (setq p-len (length vertices))
+  (dotimes (j (length vertices))
+    (setq v0 (float-vector (elt (elt vertices (mod (+ j 1) p-len)) 0) (elt (elt vertices (mod (+ j 1) p-len)) 1) 0))
+    (setq va (float-vector (elt (elt vertices (mod (+ j 2) p-len)) 0) (elt (elt vertices (mod (+ j 2) p-len)) 1) 0))
+    (setq vb (float-vector (elt (elt vertices j) 0) (elt (elt vertices j) 1) 0))
+    (setq ea (normalize-vector (v- va v0)))
+    (setq eb (normalize-vector (v- vb v0)))
+    (setq theta (acos (v. ea eb)))
+    (if (> (elt (v* ea eb) 2) 0) (setq theta (- (* 2 pi) theta)))
+    (setq np (v+
+              v0
+              (scale
+               (/ inner-margin (* (norm (v+ ea eb)) (sin (/ theta 2))))
+               (v+ ea eb))))
+
+    ;; skip adding a new vertice if the previous vertice is too close
+    (when (= j 0)
+      (setq new-vertices (nconc new-vertices (list (float-vector (elt np 0) (elt np 1) 0))))
+      (setq pre-np np)
+      )
+    (when (> j 0)
+      (when (> (norm (v- np pre-np)) near-margin)
+        (setq new-vertices (nconc new-vertices (list (float-vector (elt np 0) (elt np 1) 0))))
+        (setq pre-np np)
+        )
+      )
     )
   (instance face :init :vertices new-vertices)
   )
@@ -227,12 +262,13 @@
     (setq base-face (change-face-scale base-face face-scale))
     ;; make base face smaller
     ;; (setq base-face (change-face-size base-face (* -0.03 face-scale)))
-    (setq base-face (change-face-size base-face (* -0.1 face-scale)))
+    ;; (setq base-face (change-face-size base-face (* -0.1 face-scale)))
+    (setq base-face (change-face-size base-face (* -0.1 face-scale) (* 0.08 face-scale)))
     ;; sort base face vertices clockwise
     (setq base-face (sort-face-vertices-clockwise base-face 1))
     ;; remove near vertices
     ;; (setq base-face (remove-near-vertices base-face (* 0.03 face-scale)))
-    (setq base-face (remove-near-vertices base-face (* 0.08 face-scale)))
+    ;; (setq base-face (remove-near-vertices base-face (* 0.08 face-scale)))
     ;; (ros::ros-info "i: ~A  area: ~A" i (send base-face :area))
 
     ;; skip small polygon
@@ -249,11 +285,11 @@
             (setq upper-face (change-face-scale upper-face face-scale))
             ;; make hole larger
             ;; (setq upper-face (change-face-size upper-face (* 0.03 face-scale)))
-            (setq upper-face (change-face-size upper-face (* 0.2 face-scale)))
+            (setq upper-face (change-face-size upper-face (* 0.2 face-scale) (* 0.03 face-scale)))
             ;; sort upper face vertices clockwise
             (setq upper-face (sort-face-vertices-clockwise upper-face 1))
             ;; remove near vertices
-            (setq upper-face (remove-near-vertices upper-face (* 0.03 face-scale)))
+            ;; (setq upper-face (remove-near-vertices upper-face (* 0.03 face-scale)))
             ;; (ros::ros-info "  j: ~A  area: ~A" j (send upper-face :area))
 
             ;; get common-faces
