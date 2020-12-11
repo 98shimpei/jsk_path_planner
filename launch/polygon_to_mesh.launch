@@ -13,6 +13,10 @@
   <group if="$(arg publish_steppable_region)">
     <node name="steppable_region_publisher" pkg="safe_footstep_planner" type="steppable_region_publisher" />
 
+    <node name="steppable_region_visualizer" pkg="jsk_path_planner" type="steppable_region_visualizer.py">
+      <remap from="~input" to="/steppable_region" />
+    </node>
+
     <node name="target_height_publisher" pkg="safe_footstep_planner" type="target_height_publisher" output="screen"/>
   </group>
 
