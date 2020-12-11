@@ -1,9 +1,10 @@
 <launch>
   <arg name="publish_steppable_region" default="false" />
 
-  <node pkg="jsk_path_planner" type="polygon-to-mesh.l"
+  <node pkg="jsk_path_planner" type="polygon_to_mesh_main.l"
         name="polygon_to_mesh" output="screen">
     <remap from="~input" to="/organized_multi_plane_segmentation/output_polygon" />
+    <remap from="~meshed_polygons" to="/meshed_polygons" />
     <rosparam>
       add_local_plane: true
     </rosparam>
