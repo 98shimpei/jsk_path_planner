@@ -3,27 +3,27 @@
 (ros::roseus-add-msgs "jsk_recognition_msgs")
 (ros::roseus-add-msgs "safe_footstep_planner")
 
-(defun make-local-plane (x-len y-len z header)
+(defun make-local-plane (x-len y-len x y z header)
   (setq points-msg (list))
   (setq points-msg
         (nconc points-msg (list (instance geometry_msgs::Point32 :init
-                                          :x (float (/ x-len 2))
-                                          :y (float (/ y-len 2))
+                                          :x (+ x (float (/ x-len 2)))
+                                          :y (+ y (float (/ y-len 2)))
                                           :z z))))
   (setq points-msg
         (nconc points-msg (list (instance geometry_msgs::Point32 :init
-                                          :x (float (* -1 (/ x-len 2)))
-                                          :y (float (/ y-len 2))
+                                          :x (+ x (float (* -1 (/ x-len 2))))
+                                          :y (+ y (float (/ y-len 2)))
                                           :z z))))
   (setq points-msg
         (nconc points-msg (list (instance geometry_msgs::Point32 :init
-                                          :x (float (* -1 (/ x-len 2)))
-                                          :y (float (* -1 (/ y-len 2)))
+                                          :x (+ x (float (* -1 (/ x-len 2))))
+                                          :y (+ y (float (* -1 (/ y-len 2))))
                                           :z z))))
   (setq points-msg
         (nconc points-msg (list (instance geometry_msgs::Point32 :init
-                                          :x (float (/ x-len 2))
-                                          :y (float (* -1 (/ y-len 2)))
+                                          :x (+ x (float (/ x-len 2)))
+                                          :y (+ y (float (* -1 (/ y-len 2))))
                                           :z z))))
 
   (instance geometry_msgs::PolygonStamped :init
@@ -266,7 +266,7 @@
     ;; (setq base-face (change-face-size base-face (* -0.1 face-scale) (* 0.08 face-scale)))
     (setq base-face (change-face-size base-face (* 0.1 face-scale) (* 0.08 face-scale)))
     ;; sort base face vertices clockwise
-    (setq base-face (sort-face-vertices-clockwise base-face 1))
+    ;; (setq base-face (sort-face-vertices-clockwise base-face 1))
     ;; remove near vertices
     ;; (setq base-face (remove-near-vertices base-face (* 0.03 face-scale)))
     ;; (setq base-face (remove-near-vertices base-face (* 0.08 face-scale)))
@@ -275,7 +275,8 @@
     ;; skip small polygon
     (if (< (send base-face :area) (* 0.01 face-scale face-scale))
         ;; (ros::ros-info "i: ~A  area is too small" i)
-        (format t "area is too small~%")
+        (format t "area is too small: ~A  required: ~A~%"
+                (send base-face :area) (* 0.01 face-scale face-scale))
 
       ;; else
       (progn
@@ -289,7 +290,7 @@
             ;; (setq upper-face (change-face-size upper-face (* 0.2 face-scale) (* 0.03 face-scale)))
             (setq upper-face (change-face-size upper-face (* -0.2 face-scale) (* 0.03 face-scale)))
             ;; sort upper face vertices clockwise
-            (setq upper-face (sort-face-vertices-clockwise upper-face 1))
+            ;; (setq upper-face (sort-face-vertices-clockwise upper-face 1))
             ;; remove near vertices
             ;; (setq upper-face (remove-near-vertices upper-face (* 0.03 face-scale)))
             ;; (ros::ros-info "  j: ~A  area: ~A" j (send upper-face :area))

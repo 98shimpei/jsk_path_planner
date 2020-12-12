@@ -16,9 +16,31 @@
   (setq header (send msg :header))
   (setq polygons (send msg :polygons))
 
+  ;; for debug (ignore subscribed polygons)
+  (setq polygons (list))
+
   (when (ros::get-param "~add_local_plane" nil)
-    (setq local-plane (make-local-plane 3.0 3.0 0.0 header))
+    ;; x-len y-len x y z header
+    ;; pattern 1
+    (setq local-plane (make-local-plane 1.0 1.0 -2.0 0.0 0.0 header))
     (setq polygons (nconc polygons (list local-plane)))
+    (setq local-plane (make-local-plane 0.5 0.5 -2.0 0.0 0.1 header))
+    (setq polygons (nconc polygons (list local-plane)))
+
+    ;; pattern 2
+    (setq local-plane (make-local-plane 1.0 1.0 0.0 0.0 0.0 header))
+    (setq polygons (nconc polygons (list local-plane)))
+    (setq local-plane (make-local-plane 0.5 0.5 0.0 0.4 0.1 header))
+    (setq polygons (nconc polygons (list local-plane)))
+
+    ;; pattern 3
+    (setq local-plane (make-local-plane 1.0 1.0 2.0 0.0 0.0 header))
+    (setq polygons (nconc polygons (list local-plane)))
+    (setq local-plane (make-local-plane 0.5 0.5 2.0 0.0 0.1 header))
+    (setq polygons (nconc polygons (list local-plane)))
+    (setq local-plane (make-local-plane 0.2 0.2 2.0 0.0 0.2 header))
+    (setq polygons (nconc polygons (list local-plane)))
+
     )
 
   ;; use utile functions
@@ -27,11 +49,14 @@
   (setq triangles-msg (elt output-msgs 1))
   (setq triangles-view-msg (elt output-msgs 2))
   (setq base-faces-view-msg (elt output-msgs 3))
+  (setq original-msg (instance jsk_recognition_msgs::PolygonArray
+                                :init :header header :polygons polygons))
 
   (ros::publish "~sorted_polygons" polygon-array-msg)
   (ros::publish "~meshed_polygons" triangles-msg)
   (ros::publish "~meshed_polygons_view" triangles-view-msg)
   (ros::publish "~small_polygons_view" base-faces-view-msg)
+  (ros::publish "~original_polygons_view" original-msg)
   (ros::ros-info "published")
 
   ;; debug viewer
@@ -50,6 +75,7 @@
 (ros::advertise "~meshed_polygons" safe_footstep_planner::PolygonArray 1)
 (ros::advertise "~meshed_polygons_view" jsk_recognition_msgs::PolygonArray 1)
 (ros::advertise "~small_polygons_view" jsk_recognition_msgs::PolygonArray 1)
+(ros::advertise "~original_polygons_view" jsk_recognition_msgs::PolygonArray 1)
 
 (do-until-key
  (ros::spin-once))
