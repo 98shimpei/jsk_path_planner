@@ -264,7 +264,7 @@
     ;; (setq base-face (change-face-size base-face (* -0.03 face-scale)))
     ;; (setq base-face (change-face-size base-face (* -0.1 face-scale)))
     ;; (setq base-face (change-face-size base-face (* -0.1 face-scale) (* 0.08 face-scale)))
-    (setq base-face (change-face-size base-face (* 0.1 face-scale) (* 0.08 face-scale)))
+    (setq base-face (change-face-size base-face (* 0.05 face-scale) (* 0.08 face-scale)))
     ;; sort base face vertices clockwise
     ;; (setq base-face (sort-face-vertices-clockwise base-face 1))
     ;; remove near vertices
@@ -288,7 +288,8 @@
             ;; make hole larger
             ;; (setq upper-face (change-face-size upper-face (* 0.03 face-scale)))
             ;; (setq upper-face (change-face-size upper-face (* 0.2 face-scale) (* 0.03 face-scale)))
-            (setq upper-face (change-face-size upper-face (* -0.2 face-scale) (* 0.03 face-scale)))
+            ;; (setq upper-face (change-face-size upper-face (* -0.2 face-scale) (* 0.03 face-scale)))
+            (setq upper-face (change-face-size upper-face (* -0.05 face-scale) (* 0.03 face-scale)))
             ;; sort upper face vertices clockwise
             ;; (setq upper-face (sort-face-vertices-clockwise upper-face 1))
             ;; remove near vertices
@@ -310,10 +311,10 @@
                   ;; sort common face vertices anticlockwise
                   ;; (ros::ros-info "  j: ~A  common area k: ~A : ~A" j k (send common-face :area))
                   ;; (ros::ros-info "  vertices: ~A" (length (send common-face :vertices)))
-                  (setq common-face (sort-face-vertices-clockwise common-face -1))
+                  ;; (setq common-face (sort-face-vertices-clockwise common-face -1))
 
                   ;; set common face as hole
-                  (setq h (instance hole :init :vertices (cdr (send common-face :vertices))))
+                  (setq h (instance hole :init :vertices (cdr (reverse (send common-face :vertices)))))
                   (send base-face :enter-hole h)
                   ;; (ros::ros-info "  j: ~A  removed area k: ~A : ~A" j k (send base-face :area))
                   )
