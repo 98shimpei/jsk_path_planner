@@ -1,5 +1,6 @@
 <launch>
   <arg name="publish_steppable_region" default="false" />
+  <arg name="debug_view" default="true" />
 
   <node pkg="jsk_path_planner" type="polygon_to_mesh_main.l"
         name="polygon_to_mesh" output="screen">
@@ -9,6 +10,10 @@
       add_local_plane: true
     </rosparam>
   </node>
+
+  <node name="rviz" pkg="rviz" type="rviz"
+        args="-d $(find jsk_path_planner)/rviz/steppable_region_debug.rviz"
+        output="screen" if="$(arg debug_view)"/>
 
   <group if="$(arg publish_steppable_region)">
     <node name="steppable_region_publisher" pkg="safe_footstep_planner" type="steppable_region_publisher" />
