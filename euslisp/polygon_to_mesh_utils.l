@@ -281,6 +281,7 @@
       ;; else
       (progn
         (when (> i 0)
+          (setq hole-candidates (list))
           (dotimes (j i)
             (setq upper-face (polygon-msg-to-face (elt sorted-polygons j)))
             ;; scale face size x1000
@@ -315,11 +316,51 @@
 
                   ;; set common face as hole
                   (setq h (instance hole :init :vertices (cdr (reverse (send common-face :vertices)))))
-                  (send base-face :enter-hole h)
+                  (setq hole-candidates (nconc hole-candidates (list h)))
+                  ;; (send base-face :enter-hole h)
                   ;; (ros::ros-info "  j: ~A  removed area k: ~A : ~A" j k (send base-face :area))
                   )
                 )
               )
+            )
+
+          ;; combine holes in hole-candidates
+          (when (> (length hole-candidates) 1)
+            (dotimes (x (length hole-candidates))
+              (setq y (+ x 1))
+              (while (< y (length hole-candidates))
+                (setq combined-holes (face+ (elt hole-candidates x) (elt hole-candidates y)))
+                (print combined-holes)
+                (when (eq (length combined-holes) 1)
+                  (setf (elt hole-candidates x)
+                        (instance hole :init :vertices
+                                  (reverse (cdr (reverse (send (car combined-holes) :vertices))))))
+                  (setq hole-candidates (remove (elt hole-candidates y) hole-candidates))
+                  )
+                (setq y (+ y 1))
+                ;; (if (eq (length combined-holes) 1)
+                ;;     (progn
+                ;;       (setf (elt hole-candidates x)
+                ;;             (instance hole :init :vertices
+                ;;                       (reverse (cdr (reverse (send (car combined-holes) :vertices))))))
+                ;;       (setq hole-candidates (remove (elt hole-candidates y) hole-candidates))
+                ;;       )
+                ;;   (setq y (+ y 1))
+                ;;   )
+                )
+              )
+            )
+
+          ;; set hole method 1
+          ;; (setf base-face
+          ;;       (instance face :init
+          ;;                 :vertices (reverse (cdr (reverse (send base-face :vertices))))
+          ;;                 :holes hole-candidates)
+          ;;       )
+
+          ;; set hole method 2
+          (dotimes (hole-id (length hole-candidates))
+            (send base-face :enter-hole (elt hole-candidates hole-id))
             )
           )
         )
