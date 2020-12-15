@@ -73,8 +73,20 @@
     (setq local-plane (make-local-plane 0.8 0.2 -2.0 4.0 0.2 header))
     (setq polygons (nconc polygons (list local-plane)))
 
-    ;; (setq non-convex-plane (make-non-convex-plane header))
-    ;; (setq polygons (nconc polygons (list non-convex-plane)))
+    ;; pattern 8
+    (setq local-plane (make-local-plane 1.0 1.0 0.0 4.0 0.0 header))
+    (setq polygons (nconc polygons (list local-plane)))
+    (setq local-plane (make-local-plane 0.5 1.2 0.0 4.0 0.1 header))
+    (setq polygons (nconc polygons (list local-plane)))
+
+    ;; pattern 9
+    (setq local-plane (make-local-plane 1.0 1.0 2.0 4.0 0.0 header))
+    (setq polygons (nconc polygons (list local-plane)))
+    (setq local-plane (make-local-plane 0.4 1.2 2.0 4.0 0.1 header))
+    (setq polygons (nconc polygons (list local-plane)))
+    (setq local-plane (make-local-plane 1.2 0.4 2.0 4.0 0.2 header))
+    (setq polygons (nconc polygons (list local-plane)))
+
     )
 
   ;; use utile functions
