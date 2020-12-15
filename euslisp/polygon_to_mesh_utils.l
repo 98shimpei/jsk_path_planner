@@ -240,6 +240,27 @@
             :polygons polygons-msg)
   )
 
+(defun combine-holes (hole-candidates)
+  (when (> (length hole-candidates) 1)
+    (setq x 0)
+    (while (< x (length hole-candidates))
+      (setq y (+ x 1))
+      (while (< y (length hole-candidates))
+        (setq combined-holes (face+ (elt hole-candidates x) (elt hole-candidates y)))
+        (if (eq (length combined-holes) 1)
+            (progn
+              (setq hole-candidates (remove (elt hole-candidates y) hole-candidates))
+              (setf (elt hole-candidates x) (car combined-holes))
+              )
+          (setq y (+ y 1))
+          )
+        )
+      (setq x (+ x 1))
+      )
+    )
+  hole-candidates
+  )
+
 
 (defun make-triangles-from-msg(header polygons)
   ;; sort polygons by height mean of points (descending)
@@ -257,6 +278,9 @@
   (setq face-scale 1000.0)
 
   (dotimes (i (length sorted-polygons))
+    ;; for debug
+    (setq base-box-up-faces (list))
+
     (setq base-face (polygon-msg-to-face (elt sorted-polygons i)))
     ;; scale face size x1000
     (setq base-face (change-face-scale base-face face-scale))
@@ -264,22 +288,29 @@
     ;; (setq base-face (change-face-size base-face (* -0.03 face-scale)))
     ;; (setq base-face (change-face-size base-face (* -0.1 face-scale)))
     ;; (setq base-face (change-face-size base-face (* -0.1 face-scale) (* 0.08 face-scale)))
-    (setq base-face (change-face-size base-face (* 0.05 face-scale) (* 0.08 face-scale)))
+    (setq base-face (change-face-size base-face (* 0.05 face-scale) (* 0.001 face-scale)))
     ;; sort base face vertices clockwise
-    ;; (setq base-face (sort-face-vertices-clockwise base-face 1))
+    (setq base-face (sort-face-vertices-clockwise base-face 1))
     ;; remove near vertices
     ;; (setq base-face (remove-near-vertices base-face (* 0.03 face-scale)))
     ;; (setq base-face (remove-near-vertices base-face (* 0.08 face-scale)))
     ;; (ros::ros-info "i: ~A  area: ~A" i (send base-face :area))
 
     ;; skip small polygon
-    (if (< (send base-face :area) (* 0.01 face-scale face-scale))
+    (if (< (send base-face :area) (* 0.0001 face-scale face-scale))
         ;; (ros::ros-info "i: ~A  area is too small" i)
         (format t "area is too small: ~A  required: ~A~%"
                 (send base-face :area) (* 0.01 face-scale face-scale))
 
       ;; else
       (progn
+        (when (eq i 0)
+          ;; (print "i=0 !!!")
+          ;; (print base-face)
+          ;; (print base-box-up-faces)
+          (setq base-box-up-faces (append base-box-up-faces (list base-face)))
+          ;; (print base-box-up-faces)
+          )
         (when (> i 0)
           (setq hole-candidates (list))
           (dotimes (j i)
@@ -290,9 +321,9 @@
             ;; (setq upper-face (change-face-size upper-face (* 0.03 face-scale)))
             ;; (setq upper-face (change-face-size upper-face (* 0.2 face-scale) (* 0.03 face-scale)))
             ;; (setq upper-face (change-face-size upper-face (* -0.2 face-scale) (* 0.03 face-scale)))
-            (setq upper-face (change-face-size upper-face (* -0.05 face-scale) (* 0.03 face-scale)))
+            (setq upper-face (change-face-size upper-face (* -0.05 face-scale) (* 0.001 face-scale)))
             ;; sort upper face vertices clockwise
-            ;; (setq upper-face (sort-face-vertices-clockwise upper-face 1))
+            (setq upper-face (sort-face-vertices-clockwise upper-face 1))
             ;; remove near vertices
             ;; (setq upper-face (remove-near-vertices upper-face (* 0.03 face-scale)))
             ;; (ros::ros-info "  j: ~A  area: ~A" j (send upper-face :area))
@@ -302,21 +333,24 @@
             ;; cast common-faces type to list
             (if (not (eq (class common-faces) (class (list 1))))
                 (setq common-faces (list common-faces)))
-
+            ;; (format t "common-faces: ~A~%" (length common-faces))
             ;; remove common face as hole
             (dotimes (k (length common-faces))
               (setq common-face (elt common-faces k))
               (when (eq (class common-face) (class base-face))
                 ;; length of vertices <= 3 is not face (line or point)
+                ;; (format t "common-face vertices: ~A~%" (length (send common-face :vertices)))
                 (when (> (length (send common-face :vertices)) 3)
                   ;; sort common face vertices anticlockwise
                   ;; (ros::ros-info "  j: ~A  common area k: ~A : ~A" j k (send common-face :area))
                   ;; (ros::ros-info "  vertices: ~A" (length (send common-face :vertices)))
                   ;; (setq common-face (sort-face-vertices-clockwise common-face -1))
+                  (setq common-face (sort-face-vertices-clockwise common-face 1))
 
                   ;; set common face as hole
-                  (setq h (instance hole :init :vertices (cdr (reverse (send common-face :vertices)))))
-                  (setq hole-candidates (nconc hole-candidates (list h)))
+                  ;; (setq h (instance hole :init :vertices (cdr (reverse (send common-face :vertices)))))
+                  ;; (setq hole-candidates (nconc hole-candidates (list h)))
+                  (setq hole-candidates (nconc hole-candidates (list common-face)))
                   ;; (send base-face :enter-hole h)
                   ;; (ros::ros-info "  j: ~A  removed area k: ~A : ~A" j k (send base-face :area))
                   )
@@ -325,54 +359,44 @@
             )
 
           ;; combine holes in hole-candidates
-          (when (> (length hole-candidates) 1)
-            (dotimes (x (length hole-candidates))
-              (setq y (+ x 1))
-              (while (< y (length hole-candidates))
-                (setq combined-holes (face+ (elt hole-candidates x) (elt hole-candidates y)))
-                (print combined-holes)
-                (when (eq (length combined-holes) 1)
-                  (setf (elt hole-candidates x)
-                        (instance hole :init :vertices
-                                  (reverse (cdr (reverse (send (car combined-holes) :vertices))))))
-                  (setq hole-candidates (remove (elt hole-candidates y) hole-candidates))
-                  )
-                (setq y (+ y 1))
-                ;; (if (eq (length combined-holes) 1)
-                ;;     (progn
-                ;;       (setf (elt hole-candidates x)
-                ;;             (instance hole :init :vertices
-                ;;                       (reverse (cdr (reverse (send (car combined-holes) :vertices))))))
-                ;;       (setq hole-candidates (remove (elt hole-candidates y) hole-candidates))
-                ;;       )
-                ;;   (setq y (+ y 1))
-                ;;   )
-                )
+          (setq hole-candidates (combine-holes hole-candidates))
+
+          ;; set hole using box
+          ;; (format t "hole candidates ~A~%" (length hole-candidates))
+          (setq base-box (make-prism (reverse (cdr (reverse (send base-face :vertices)))) 10))
+
+          (dotimes (hole-id (length hole-candidates))
+            (setq hole-candidate (elt hole-candidates hole-id))
+            (setq hole-candidate
+                  (change-face-size hole-candidate (* -0.001 face-scale) (* 0.001 face-scale)))
+            (setq hole-box
+                  (make-prism
+                   (reverse (cdr (reverse (send hole-candidate :vertices)))) 30))
+            (send hole-box :translate #f(0 0 -10))
+            (setq base-box (body- base-box hole-box))
+            )
+
+          (setq base-box-faces (send base-box :faces))
+          (dotimes (face-id (length base-box-faces))
+            (when (eq (elt (send (elt base-box-faces face-id) :normal) 2) 1.0)
+              ;; (nconc base-box-up-faces (list (elt base-box-faces face-id)))
+              (setq base-box-up-faces (append base-box-up-faces (list (elt base-box-faces face-id))))
               )
             )
 
-          ;; set hole method 1
-          ;; (setf base-face
-          ;;       (instance face :init
-          ;;                 :vertices (reverse (cdr (reverse (send base-face :vertices))))
-          ;;                 :holes hole-candidates)
-          ;;       )
-
-          ;; set hole method 2
-          (dotimes (hole-id (length hole-candidates))
-            (send base-face :enter-hole (elt hole-candidates hole-id))
-            )
           )
         )
       )
 
     ;; for debug
-    (setq base-faces (nconc base-faces (list base-face)))
+    (setq base-faces (append base-faces base-box-up-faces))
 
     ;; make triangle meshes and add them to list
     ;; (ros::ros-info "base face vertices: ~A" (length (send base-face :vertices)))
     ;; (ros::ros-info "base face holes: ~A" (length (send base-face :holes)))
-    (setq triangles (nconc triangles (geometry::face-to-triangle base-face)))
+    ;; (setq triangles (nconc triangles (geometry::face-to-triangle base-face)))
+    (dotimes (face-id (length base-box-up-faces))
+      (setq triangles (nconc triangles (geometry::face-to-triangle (elt base-box-up-faces face-id)))))
     ;; (ros::ros-info "make triangles from base-face  length: ~A"
     ;;   (length (geometry::face-to-triangle base-face)))
     )
