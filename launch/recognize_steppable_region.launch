@@ -2,10 +2,12 @@
 
   <arg name="rviz"                   default="false" />
   <arg name="ROBOT_FRAME"            default="BODY" />
+  <arg name="CENTER_FRAME"           default="body_on_odom" />
+  <arg name="FIXED_FRAME"            default="odom_ground" />
   <arg name="NODELET_MANAGER_NAME"   default="recognize_steppable_region_nodelet"/>
   <arg name="NODELET_INDEX"          default="0"/>
 
-  <arg name="USE_SELF_FILTER"        default="true"/>
+  <arg name="USE_SELF_FILTER"        default="false"/>
   <arg name="SELF_FILTER_PARAM"      value="$(find jsk_path_planner)/config/jaxon_self_filter.yaml" />
   <arg name="USE_BBOX_CLIP"          default="false" />
   <arg name="USE_HEIGHTMAP"          default="true" />
@@ -26,6 +28,14 @@
         pkg="nodelet" type="nodelet"
         args="manager"/>
 
+  <!-- publish CENTER_FRAME -->
+  <node pkg="jsk_robot_startup" type="body_on_odom_publisher.py" name="body_on_odom_publisher"
+        output="screen" respawn="true">
+    <param name="~robot_frame"        value="$(arg ROBOT_FRAME)"/>
+    <param name="~odom_ground_frame"  value="$(arg FIXED_FRAME)"/>
+    <param name="~rate"               value="100"/>
+  </node>
+
   <!-- pointcloud pub regulator -->
   <node pkg="jsk_path_planner" type="pointcloud_pub_regulator.py"
         name="pointcloud_pub_regulator" output="screen">
@@ -40,7 +50,7 @@
         args="load jsk_pcl/ResizePointsPublisher $(arg NODELET_MANAGER_NAME)">
     <remap from="~input" to="$(arg rs_name_space)/points_low_hz"/>
     <remap from="~output" to="$(arg rs_name_space)/points_low_hz_resized"/>
-    <rosparam>
+    <rosparam subst_value="true">
       step_x: $(arg POINTCLOUD_RESIZE_STEP)
       step_y: $(arg POINTCLOUD_RESIZE_STEP)
     </rosparam>
@@ -51,7 +61,8 @@
         args="load jsk_pcl/TfTransformCloud $(arg NODELET_MANAGER_NAME)" output="screen">
     <remap from="~input" to="$(arg rs_name_space)/points_low_hz_resized" />
     <rosparam subst_value="true">
-      target_frame_id: $(arg ROBOT_FRAME)
+      target_frame_id: $(arg CENTER_FRAME)
+      # target_frame_id: $(arg ROBOT_FRAME)
     </rosparam>
   </node>
 
@@ -59,7 +70,8 @@
   <group if="$(arg USE_SELF_FILTER)">
     <node pkg="robot_self_filter" type="self_filter"
           name="robot_center_pointcloud_sf" output="screen">
-      <remap from="cloud_in"  to="$(arg rs_name_space)/points_low_hz_resized" />
+      <!-- <remap from="cloud_in"  to="$(arg rs_name_space)/points_low_hz_resized" /> -->
+      <remap from="cloud_in"  to="/robot_center_pointcloud/output" />
       <remap from="cloud_out" to="$(arg rs_name_space)/points_filtered" />
       <rosparam subst_value="true">
         use_rgb: true
@@ -99,9 +111,9 @@
     <node name="rt_current_heightmap"
           pkg="nodelet" type="nodelet"
           args="load jsk_pcl/HeightmapConverter $(arg NODELET_MANAGER_NAME)">
-      <!-- <remap from="~input" to="/robot_center_pointcloud/output" /> -->
-      <remap from="~input" to="$(arg rs_name_space)/points_filtered" />
-      <rosparam>
+      <remap from="~input" to="/robot_center_pointcloud/output" />
+      <!-- <remap from="~input" to="$(arg rs_name_space)/points_filtered" /> -->
+      <rosparam subst_value="true">
         min_x: -2.5
         max_x:  2.5
         min_y: -2.5
@@ -116,7 +128,7 @@
           pkg="nodelet" type="nodelet"
           args="load jsk_pcl/HeightmapMorphologicalFiltering $(arg NODELET_MANAGER_NAME)">
       <remap from="~input" to="/rt_current_heightmap/output" />
-      <rosparam>
+      <rosparam subst_value="true">
         mask_size: 3 ## cover within 0.06m
         max_variance: 0.0002 ### (* 0.014 0.014)
         smooth_method: max_distance
@@ -132,10 +144,10 @@
       <remap from="~input" to="/rt_accumulated_heightmap_pointcloud/output" />
       <!-- <remap from="~info" to="/rs_l515/depth/camera_info" /> -->
       <remap from="~info" to="/rs_l515/color/camera_info" />
-      <rosparam>
+      <rosparam subst_value="true">
         camera_link_frame: rs_l515_depth_frame
-        # use_asynchronous: true
-        use_asynchronous: false
+        use_asynchronous: true
+        # use_asynchronous: false
         # use_approximate: true
         max_queue_size: 100
         # custom_fov_h: 70.0
@@ -151,9 +163,9 @@
           args="load jsk_pcl/HeightmapTimeAccumulation $(arg NODELET_MANAGER_NAME)">
       <remap from="~input" to="/rt_filtered_current_heightmap/output" />
       <remap from="~input/prev_pointcloud" to="/rt_frustum_culling/output_cloud" />
-      <rosparam>
-        center_frame_id: BODY
-        fixed_frame_id:  odom_ground
+      <rosparam subst_value="true">
+        center_frame_id: $(arg CENTER_FRAME)
+        fixed_frame_id: $(arg FIXED_FRAME)
       </rosparam>
     </node>
 
@@ -161,7 +173,7 @@
           pkg="nodelet" type="nodelet"
           args="load jsk_pcl/HeightmapMorphologicalFiltering $(arg NODELET_MANAGER_NAME)">
       <remap from="~input" to="/rt_accumulated_heightmap/output" />
-      <rosparam>
+      <rosparam subst_value="true">
         mask_size: 3 ## cover within 0.06m
         max_variance: 0.0002 ### (* 0.014 0.014)
         smooth_method: max_distance
@@ -175,9 +187,22 @@
     <node name="rt_accumulated_heightmap_pointcloud"
           pkg="nodelet" type="nodelet"
           args="load jsk_pcl/HeightmapToPointCloud $(arg NODELET_MANAGER_NAME)">
+      <!-- <remap from="~input" to="rt_accumulated_heightmap/output" /> -->
       <remap from="~input" to="rt_filtered_accumulated_heightmap/output" />
       <rosparam>
         keep_organized: true
+      </rosparam>
+    </node>
+
+    <!-- this is not required if target_frame_id is $(arg CENTER_FRAME) -->
+    <!-- [tmp!!] convert to FIXED_FRAME -->
+    <!-- This is for fixing steppable region while walking -->
+    <node name="rt_accumulated_heightmap_pointcloud_odomrelative"
+          pkg="nodelet" type="nodelet"
+          args="load jsk_pcl_utils/TfTransformCloud $(arg NODELET_MANAGER_NAME)">
+      <remap from="~input" to="/rt_accumulated_heightmap_pointcloud/output" />
+      <rosparam subst_value="true">
+        target_frame_id: $(arg FIXED_FRAME)
       </rosparam>
     </node>
 
@@ -188,11 +213,12 @@
         pkg="nodelet" type="nodelet"
         args="load jsk_pcl/OrganizedMultiPlaneSegmentation $(arg NODELET_MANAGER_NAME)">
     <remap from="~input" to="/depth_image_creator/output_cloud" unless="$(arg USE_HEIGHTMAP)"/>
-    <!-- <remap from="~input" to="/rt_filtered_heightmap_pointcloud/output" if="$(arg USE_HEIGHTMAP)"/> -->
-    <remap from="~input" to="/rt_accumulated_heightmap_pointcloud/output" if="$(arg USE_HEIGHTMAP)"/>
+    <!-- <remap from="~input" to="/rt_accumulated_heightmap_pointcloud/output" if="$(arg USE_HEIGHTMAP)"/> -->
+    <remap from="~input" to="/rt_accumulated_heightmap_pointcloud_odomrelative/output" if="$(arg USE_HEIGHTMAP)"/>
+    <!-- <remap from="~input" to="/rt_accumulated_heightmap_pointcloud_odomrelative_fixed/output" if="$(arg USE_HEIGHTMAP)"/> -->
     <rosparam>
-      min_size: 100
-      distance_threshold: 0.03
+      min_size: 500
+      distance_threshold: 1.0
       angular_threshold: 0.05
       max_curvature: 0.03
       ransac_refine_outlier_distance_threshold: 0.3
