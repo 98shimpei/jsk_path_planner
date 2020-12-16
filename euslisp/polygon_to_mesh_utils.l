@@ -12,18 +12,18 @@
                                           :z z))))
   (setq points-msg
         (nconc points-msg (list (instance geometry_msgs::Point32 :init
-                                          :x (+ x (float (* -1 (/ x-len 2))))
-                                          :y (+ y (float (/ y-len 2)))
-                                          :z z))))
-  (setq points-msg
-        (nconc points-msg (list (instance geometry_msgs::Point32 :init
-                                          :x (+ x (float (* -1 (/ x-len 2))))
-                                          :y (+ y (float (* -1 (/ y-len 2))))
-                                          :z z))))
-  (setq points-msg
-        (nconc points-msg (list (instance geometry_msgs::Point32 :init
                                           :x (+ x (float (/ x-len 2)))
                                           :y (+ y (float (* -1 (/ y-len 2))))
+                                          :z z))))
+  (setq points-msg
+        (nconc points-msg (list (instance geometry_msgs::Point32 :init
+                                          :x (+ x (float (* -1 (/ x-len 2))))
+                                          :y (+ y (float (* -1 (/ y-len 2))))
+                                          :z z))))
+  (setq points-msg
+        (nconc points-msg (list (instance geometry_msgs::Point32 :init
+                                          :x (+ x (float (* -1 (/ x-len 2))))
+                                          :y (+ y (float (/ y-len 2)))
                                           :z z))))
 
   (instance geometry_msgs::PolygonStamped :init
@@ -115,6 +115,33 @@
       )
     )
   (instance face :init :vertices new-vertices)
+  )
+
+(defun change-face-size-use-body (f inner-margin inv)
+  (setq vertices (reverse (cdr (reverse (send f :vertices)))))
+  (setq edges (send f :edges))
+
+  (setq org-box (make-prism vertices 10))
+  (setq edge-box-height 30)
+  (setq cp (make-plane :normal #f(0 0 1) :point #f(0 0 5)))
+  (dotimes (edge-id (length edges))
+    (setq p1 (send (elt edges edge-id) :point 0))
+    (setq p2 (send (elt edges edge-id) :point 1))
+    (setq ea (normalize-vector (v- p2 p1)))
+    (setq a1 (v- (v+ (scale inner-margin (transform rot ea)) p1) (scale 1000 ea)))
+    (setq a2 (v+ (v+ (scale inner-margin (transform rot ea)) p2) (scale 1000 ea)))
+    (setq a3 (v+ (v+ (scale inner-margin (transform (transpose rot) ea)) p2) (scale 1000 ea)))
+    (setq a4 (v- (v+ (scale inner-margin (transform (transpose rot) ea)) p1) (scale 1000 ea)))
+    (setq edge-box (make-prism (list a1 a2 a3 a4) edge-box-height))
+    (send edge-box :translate (float-vector 0 0 (/ (- 10 edge-box-height) 2)))
+    (setq edge-box-height (+ edge-box-height 10))
+    (if (> inv 0)
+        (setq org-box (body+ org-box edge-box))
+      (setq org-box (body- org-box edge-box))
+      )
+    )
+
+  (car (cut-body org-box cp))
   )
 
 (defun calc-theta (v)
@@ -261,12 +288,60 @@
   hole-candidates
   )
 
+(defun combine-same-height-polygons (polygons height-th)
+  (setq projected-polygons (list))
+  (dotimes (polygon-id (length polygons))
+    (setq projected-polygons
+          (nconc projected-polygons
+                 (list (sort-face-vertices-clockwise
+                        (polygon-msg-to-face (elt polygons polygon-id)) 1)))))
+  (format t "projected polygons: ~A~%" (length projected-polygons))
+  (when (> (length polygons) 1)
+    (setq x 0)
+    (while (< x (length polygons))
+      (setq y (+ x 1))
+      (while (< y (length polygons))
+        (setq height-diff (- (calc-plane-height (elt polygons x))
+                             (calc-plane-height (elt polygons y))))
+        ;; (print height-diff)
+        (setq combined-polygons (face+ (elt projected-polygons x) (elt projected-polygons y)))
+        (if (and (eq (length combined-polygons) 1) (< height-diff height-th))
+            (progn
+              (print (class (car combined-polygons)))
+              (format t "polygon x area: ~A~%" (send (elt projected-polygons x) :area))
+              (format t "polygon y area: ~A~%" (send (elt projected-polygons y) :area))
+              (format t "combined  area: ~A~%" (send (car combined-polygons) :area))
+              (setq polygons (remove (elt polygons y) polygons))
+              (setq projected-polygons (remove (elt projected-polygons y) projected-polygons))
+              (setf (elt projected-polygons x) (car combined-polygons))
+              )
+          (setq y (+ y 1))
+          )
+        )
+      (setq x (+ x 1))
+      )
+    )
+  ;; polygons
+  ;; (print "combine done")
+  ;; (print (length polygons))
+  ;; (print (length projected-polygons))
+  projected-polygons
+  )
+
 
 (defun make-triangles-from-msg(header polygons)
+  ;; set face scale
+  (setq face-scale 1000.0)
+
   ;; sort polygons by height mean of points (descending)
   (setq sorted-polygons
         (sort (copy-list polygons) 'compare-plane-height)
         )
+
+  ;; (format t "polygons before combine: ~A~%" (length sorted-polygons))
+  ;; (setq projected-polygons
+  ;;       (combine-same-height-polygons sorted-polygons (* 0.01)))
+  ;; (format t "polygons after combine:  ~A~%" (length projected-polygons))
 
   ;; prepare ouput triangles list
   (setq triangles (list))
@@ -274,30 +349,35 @@
   ;; for debug
   (setq base-faces (list))
 
-  ;; set face scale
-  (setq face-scale 1000.0)
-
   (dotimes (i (length sorted-polygons))
+  ;; (dotimes (i (length projected-polygons))
+    ;; (format t "i: ~A~%" i)
     ;; for debug
     (setq base-box-up-faces (list))
 
     (setq base-face (polygon-msg-to-face (elt sorted-polygons i)))
+    ;; (print (send base-face :vertices))
+    ;; (setq base-face (elt projected-polygons i))
     ;; scale face size x1000
     (setq base-face (change-face-scale base-face face-scale))
     ;; make base face smaller
     ;; (setq base-face (change-face-size base-face (* -0.03 face-scale)))
     ;; (setq base-face (change-face-size base-face (* -0.1 face-scale)))
     ;; (setq base-face (change-face-size base-face (* -0.1 face-scale) (* 0.08 face-scale)))
-    (setq base-face (change-face-size base-face (* 0.05 face-scale) (* 0.001 face-scale)))
+    ;; remove near vertices
+    (setq base-face (remove-near-vertices base-face (* 0.05 face-scale)))
+    (setq base-face (change-face-size base-face (* 0.05 face-scale) -1))
+    ;; (setq base-face (change-face-size base-face (* 0.1 face-scale) (* 0.05 face-scale)))
+    ;; (setq base-face (change-face-size base-face (* 0.05 face-scale) (* 0.001 face-scale)))
     ;; sort base face vertices clockwise
-    (setq base-face (sort-face-vertices-clockwise base-face 1))
+    ;; (setq base-face (sort-face-vertices-clockwise base-face 1))
     ;; remove near vertices
     ;; (setq base-face (remove-near-vertices base-face (* 0.03 face-scale)))
     ;; (setq base-face (remove-near-vertices base-face (* 0.08 face-scale)))
     ;; (ros::ros-info "i: ~A  area: ~A" i (send base-face :area))
 
     ;; skip small polygon
-    (if (< (send base-face :area) (* 0.0001 face-scale face-scale))
+    (if (< (send base-face :area) (* 0.01 face-scale face-scale))
         ;; (ros::ros-info "i: ~A  area is too small" i)
         (format t "area is too small: ~A  required: ~A~%"
                 (send base-face :area) (* 0.01 face-scale face-scale))
@@ -315,13 +395,16 @@
           (setq hole-candidates (list))
           (dotimes (j i)
             (setq upper-face (polygon-msg-to-face (elt sorted-polygons j)))
+            ;; (setq upper-face (elt projected-polygons j))
             ;; scale face size x1000
             (setq upper-face (change-face-scale upper-face face-scale))
             ;; make hole larger
             ;; (setq upper-face (change-face-size upper-face (* 0.03 face-scale)))
             ;; (setq upper-face (change-face-size upper-face (* 0.2 face-scale) (* 0.03 face-scale)))
-            ;; (setq upper-face (change-face-size upper-face (* -0.2 face-scale) (* 0.03 face-scale)))
-            (setq upper-face (change-face-size upper-face (* -0.05 face-scale) (* 0.001 face-scale)))
+            ;; (setq upper-face (change-face-size upper-face (* -0.1 face-scale) (* 0.03 face-scale)))
+            ;; remove near vertices
+            (setq upper-face (remove-near-vertices upper-face (* 0.03 face-scale)))
+            (setq upper-face (change-face-size upper-face (* -0.05 face-scale) (* 0.03 face-scale)))
             ;; sort upper face vertices clockwise
             (setq upper-face (sort-face-vertices-clockwise upper-face 1))
             ;; remove near vertices
@@ -345,7 +428,8 @@
                   ;; (ros::ros-info "  j: ~A  common area k: ~A : ~A" j k (send common-face :area))
                   ;; (ros::ros-info "  vertices: ~A" (length (send common-face :vertices)))
                   ;; (setq common-face (sort-face-vertices-clockwise common-face -1))
-                  (setq common-face (sort-face-vertices-clockwise common-face 1))
+                  ;; (setq common-face (remove-near-vertices common-face (* 0.03 face-scale)))
+                  ;; (setq common-face (sort-face-vertices-clockwise common-faxce 1))
 
                   ;; set common face as hole
                   ;; (setq h (instance hole :init :vertices (cdr (reverse (send common-face :vertices)))))
@@ -364,23 +448,69 @@
           ;; set hole using box
           ;; (format t "hole candidates ~A~%" (length hole-candidates))
           (setq base-box (make-prism (reverse (cdr (reverse (send base-face :vertices)))) 10))
+          ;; (print "base-face")
+          ;; (print (send base-face :vertices))
 
+          ;; for avoid face cantacts (outer circuit not found)
+          (setq *epsilon* 1e-6)
+          (setq *contact-threshold* 8e-6)
           (dotimes (hole-id (length hole-candidates))
             (setq hole-candidate (elt hole-candidates hole-id))
+            (setq hole-candidate (remove-near-vertices hole-candidate (* 0.01 face-scale)))
+            ;; (setq hole-candidate (sort-face-vertices-clockwise hole-candidate 1))
             (setq hole-candidate
-                  (change-face-size hole-candidate (* -0.001 face-scale) (* 0.001 face-scale)))
+                  (change-face-size hole-candidate (* -0.01 face-scale) (* 0.001 face-scale)))
             (setq hole-box
                   (make-prism
                    (reverse (cdr (reverse (send hole-candidate :vertices)))) 30))
+            ;; (print "hole-face")
+            ;; (print (send hole-candidate :vertices))
+            (setq hole-is-not-nil t)
+            (dotimes (ver-id (length (send hole-candidate :vertices)))
+              (setq ver (elt (send hole-candidate :vertices) ver-id))
+              (when (eq (elt ver 0) (sqrt -1))
+                (setq hole-is-not-nil nil)
+                (print "hole vertices include -nan. skip remove process")
+                )
+              (when (eq (elt ver 0) (elt #f(inf inf 0.0) 0))
+                (setq hole-is-not-nil nil)
+                (print "hole vertices include inf. skip remove process")
+                )
+              )
+            (if (not (eq (class base-box) (class (make-cube 1 1 1))))
+                (print "base-box is not body class"))
+            (if (not (eq (class hole-box) (class base-box)))
+                (print "hole-box is not body class"))
+            (if (not (> (send base-box :volume) (/ (send hole-box :volume) 3)))
+                (progn
+                  (print "base-box is smaller than hole-box")
+                  (print "base-box")
+                  (print (send base-box :volume))
+                  (print (send base-box :vertices))
+                  (print "hole-box")
+                  (print (/ (send hole-box :volume) 3))
+                  (print (send hole-box :vertices))))
+            (if (not hole-is-not-nil)
+                (print "hole-box vertices include nil or inf"))
             (send hole-box :translate #f(0 0 -10))
-            (setq base-box (body- base-box hole-box))
+            (if (and (eq (class base-box) (class (make-cube 1 1 1)))
+                     (eq (class hole-box) (class base-box))
+                     (> (send base-box :volume) (/ (send hole-box :volume) 3))
+                     hole-is-not-nil)
+                (setq base-box (body- base-box hole-box))
+              ;; (setq base-box nil)
+              )
             )
 
-          (setq base-box-faces (send base-box :faces))
-          (dotimes (face-id (length base-box-faces))
-            (when (eq (elt (send (elt base-box-faces face-id) :normal) 2) 1.0)
-              ;; (nconc base-box-up-faces (list (elt base-box-faces face-id)))
-              (setq base-box-up-faces (append base-box-up-faces (list (elt base-box-faces face-id))))
+          ;; (print "final base-box")
+          ;; (print base-box)
+          (when base-box
+            (setq base-box-faces (send base-box :faces))
+            (dotimes (face-id (length base-box-faces))
+              (when (eq (elt (send (elt base-box-faces face-id) :normal) 2) 1.0)
+                ;; (nconc base-box-up-faces (list (elt base-box-faces face-id)))
+                (setq base-box-up-faces (append base-box-up-faces (list (elt base-box-faces face-id))))
+                )
               )
             )
 

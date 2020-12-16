@@ -16,11 +16,16 @@
   (setq header (send msg :header))
   (setq polygons (send msg :polygons))
 
-  ;; for debug (ignore subscribed polygons)
-  (setq polygons (list))
-
   (when (ros::get-param "~add_local_plane" nil)
     ;; x-len y-len x y z header
+    (setq local-plane (make-local-plane 2.0 2.0 0.0 0.0 -1.0 header))
+    (setq polygons (nconc polygons (list local-plane)))
+    )
+
+  ;; for debug (ignore subscribed polygons)
+  (when (ros::get-param "~debug_mode" nil)
+    (setq polygons (list))
+
     ;; pattern 1
     (setq local-plane (make-local-plane 1.0 1.0 -2.0 0.0 0.0 header))
     (setq polygons (nconc polygons (list local-plane)))
