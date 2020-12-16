@@ -7,7 +7,7 @@
   <arg name="NODELET_MANAGER_NAME"   default="recognize_steppable_region_nodelet"/>
   <arg name="NODELET_INDEX"          default="0"/>
 
-  <arg name="USE_SELF_FILTER"        default="false"/>
+  <arg name="USE_SELF_FILTER"        default="true"/>
   <arg name="SELF_FILTER_PARAM"      value="$(find jsk_path_planner)/config/jaxon_self_filter.yaml" />
   <arg name="USE_BBOX_CLIP"          default="false" />
   <arg name="USE_HEIGHTMAP"          default="true" />
@@ -61,8 +61,8 @@
         args="load jsk_pcl/TfTransformCloud $(arg NODELET_MANAGER_NAME)" output="screen">
     <remap from="~input" to="$(arg rs_name_space)/points_low_hz_resized" />
     <rosparam subst_value="true">
-      target_frame_id: $(arg CENTER_FRAME)
-      # target_frame_id: $(arg ROBOT_FRAME)
+      # target_frame_id: $(arg CENTER_FRAME)
+      target_frame_id: $(arg ROBOT_FRAME)
     </rosparam>
   </node>
 
@@ -78,12 +78,22 @@
       </rosparam>
       <rosparam command="load" file="$(arg SELF_FILTER_PARAM)" />
     </node>
+
+    <node pkg="nodelet" type="nodelet" name="self_filtered_pointcloud"
+          args="load jsk_pcl/TfTransformCloud $(arg NODELET_MANAGER_NAME)" output="screen">
+      <remap from="~input" to="$(arg rs_name_space)/points_filtered" />
+      <rosparam subst_value="true">
+        target_frame_id: $(arg CENTER_FRAME)
+      </rosparam>
+    </node>
   </group>
 
   <!-- bbox clip -->
   <!-- <group if="$(arg USE_BBOX_CLIP)"> -->
   <!--   <node pkg="jsk_path_planner" type="robot_bbox_sf_wh_publisher.py" -->
   <!--         name="robot_bbox_sf_wh_publisher" output="screen"/> -->
+  <!--   <node pkg="jsk_path_planner" type="robot_bbox_sf_publisher.py" -->
+  <!--         name="robot_bbox_sf_publisher" output="screen"/> -->
   <!-- </group> -->
   <!-- <group ns="$(arg NODELET_MANAGER_NAME)" if="$(arg USE_BBOX_CLIP)"> -->
   <!--   <rosparam subst_value="true"> -->
@@ -92,9 +102,9 @@
   <!--         type: jsk_pcl/AttentionClipper -->
   <!--         remappings: -->
   <!--           - from: ~input/points -->
-  <!--             to: $(arg rs_name_space)/points_low_hz_resized -->
-  <!--           - from: ~input/box_array -->
-  <!--             to: /robot_bbox_sf_wh -->
+  <!--             to: /robot_center_pointcloud/output -->
+  <!--           - from: ~input/box -->
+  <!--             to: /robot_bbox_sf -->
   <!--       - name: robot_center_pointcloud_bbox_clipped_sf -->
   <!--         type: jsk_pcl/ExtractIndices -->
   <!--         remappings: -->
@@ -111,7 +121,8 @@
     <node name="rt_current_heightmap"
           pkg="nodelet" type="nodelet"
           args="load jsk_pcl/HeightmapConverter $(arg NODELET_MANAGER_NAME)">
-      <remap from="~input" to="/robot_center_pointcloud/output" />
+      <!-- <remap from="~input" to="/robot_center_pointcloud/output" /> -->
+      <remap from="~input" to="/self_filtered_pointcloud/output" />
       <!-- <remap from="~input" to="$(arg rs_name_space)/points_filtered" /> -->
       <rosparam subst_value="true">
         min_x: -2.5
@@ -187,8 +198,8 @@
     <node name="rt_accumulated_heightmap_pointcloud"
           pkg="nodelet" type="nodelet"
           args="load jsk_pcl/HeightmapToPointCloud $(arg NODELET_MANAGER_NAME)">
-      <!-- <remap from="~input" to="rt_accumulated_heightmap/output" /> -->
-      <remap from="~input" to="rt_filtered_accumulated_heightmap/output" />
+      <remap from="~input" to="rt_accumulated_heightmap/output" />
+      <!-- <remap from="~input" to="rt_filtered_accumulated_heightmap/output" /> -->
       <rosparam>
         keep_organized: true
       </rosparam>
