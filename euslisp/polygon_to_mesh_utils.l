@@ -331,6 +331,53 @@
   projected-polygons
   )
 
+(defun remove-same-height-small-polygons (polygons height-th)
+  (setq cleaned-polygons (list))
+  (dotimes (polygon-id (length polygons))
+    (setq cleaned-polygons
+          (nconc cleaned-polygons
+                 (list (sort-face-vertices-clockwise
+                        (polygon-msg-to-face (elt polygons polygon-id)) 1)))))
+  (when (> (length polygons) 1)
+    (setq x 0)
+    (while (< x (length polygons))
+      (setq y (+ x 1))
+      (while (< y (length polygons))
+        (setq height-diff (- (calc-plane-height (elt polygons x))
+                             (calc-plane-height (elt polygons y))))
+        ;; (print height-diff)
+        (setq combined-polygons (face+ (elt cleaned-polygons x) (elt cleaned-polygons y)))
+        (if (and (eq (length combined-polygons) 1) (< height-diff height-th))
+            (progn
+              (if (> (send (elt cleaned-polygons x) :area)
+                     (send (elt cleaned-polygons y) :area))
+                  (progn
+                    (setq polygons (remove (elt polygons y) polygons))
+                    (setq cleaned-polygons (remove (elt cleaned-polygons y) cleaned-polygons))
+                    )
+                (progn
+                  (setq tmp-polygon (elt polygons y))
+                  (setq polygons (remove (elt polygons y) polygons))
+                  (setf (elt polygons x) tmp-polygon)
+                  (setq tmp-polygon (elt cleaned-polygons y))
+                  (setq cleaned-polygons (remove (elt cleaned-polygons y) cleaned-polygons))
+                  (setf (elt cleaned-polygons x) tmp-polygon)
+                  )
+                )
+              )
+          (setq y (+ y 1))
+          )
+        )
+      (setq x (+ x 1))
+      )
+    )
+  ;; polygons
+  ;; (print "combine done")
+  ;; (print (length polygons))
+  ;; (print (length cleaned-polygons))
+  cleaned-polygons
+  )
+
 
 (defun make-triangles-from-msg(header polygons)
   ;; set face scale
@@ -346,21 +393,29 @@
   ;;       (combine-same-height-polygons sorted-polygons (* 0.01)))
   ;; (format t "polygons after combine:  ~A~%" (length projected-polygons))
 
+  (format t "polygons before removal: ~A~%" (length sorted-polygons))
+  (setq cleaned-polygons
+        (remove-same-height-small-polygons sorted-polygons (* 0.01)))
+        ;; (combine-same-height-polygons sorted-polygons (* 0.01)))
+  (format t "polygons after removal:  ~A~%" (length cleaned-polygons))
+
   ;; prepare ouput triangles list
   (setq triangles (list))
 
   ;; for debug
   (setq base-faces (list))
 
-  (dotimes (i (length sorted-polygons))
+  ;; (dotimes (i (length sorted-polygons))
   ;; (dotimes (i (length projected-polygons))
+  (dotimes (i (length cleaned-polygons))
     ;; (format t "i: ~A~%" i)
     ;; for debug
     (setq base-box-up-faces (list))
 
-    (setq base-face (polygon-msg-to-face (elt sorted-polygons i)))
+    ;; (setq base-face (polygon-msg-to-face (elt sorted-polygons i)))
     ;; (print (send base-face :vertices))
     ;; (setq base-face (elt projected-polygons i))
+    (setq base-face (elt cleaned-polygons i))
     ;; scale face size x1000
     (setq base-face (change-face-scale base-face face-scale))
     ;; make base face smaller
@@ -398,8 +453,9 @@
         (when (> i 0)
           (setq hole-candidates (list))
           (dotimes (j i)
-            (setq upper-face (polygon-msg-to-face (elt sorted-polygons j)))
+            ;; (setq upper-face (polygon-msg-to-face (elt sorted-polygons j)))
             ;; (setq upper-face (elt projected-polygons j))
+            (setq upper-face (elt cleaned-polygons j))
             ;; scale face size x1000
             (setq upper-face (change-face-scale upper-face face-scale))
             ;; make hole larger
