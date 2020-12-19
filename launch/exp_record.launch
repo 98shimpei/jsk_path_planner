@@ -1,0 +1,19 @@
+<launch>
+  <arg name="bagfile" default="steppable_region_exp.bag"/>
+  <node name="rosbag_record"
+        pkg="rosbag" type="record"
+        args="-O $(arg bagfile)
+              -b 0
+              /tf
+              /tf_static
+              /rs_l515/depth/color/points_low_hz_resized
+              /rs_l515/color/image_raw
+              /rt_accumulated_heightmap_pointcloud_odomrelative/output
+              /organized_multi_plane_segmentation/output_polygon
+              /organized_multi_plane_segmentation/output_refined_polygon
+              /polygon_to_mesh/meshed_polygons_view
+              /steppable_region_visualizer/output
+              /landing_pose"
+        output="screen">
+  </node>
+</launch>
