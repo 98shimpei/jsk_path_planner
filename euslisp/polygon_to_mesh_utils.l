@@ -118,12 +118,15 @@
   )
 
 (defun change-face-size-use-body (f inner-margin inv)
+  (setq *epsilon* 1e-6)
+  (setq *contact-threshold* 8e-6)
   (setq vertices (reverse (cdr (reverse (send f :vertices)))))
   (setq edges (send f :edges))
 
   (setq org-box (make-prism vertices 10))
   (setq edge-box-height 30)
   (setq cp (make-plane :normal #f(0 0 1) :point #f(0 0 5)))
+  (setq rot #3F((0 -1 0) (1 0 0) (0 0 1)))
   (dotimes (edge-id (length edges))
     (setq p1 (send (elt edges edge-id) :point 0))
     (setq p2 (send (elt edges edge-id) :point 1))
@@ -367,6 +370,7 @@
     ;; remove near vertices
     (setq base-face (remove-near-vertices base-face (* 0.05 face-scale)))
     (setq base-face (change-face-size base-face (* 0.05 face-scale) -1))
+    ;; (setq base-face (change-face-size-use-body base-face (* 0.05 face-scale) -1))
     ;; (setq base-face (change-face-size base-face (* 0.1 face-scale) (* 0.05 face-scale)))
     ;; (setq base-face (change-face-size base-face (* 0.05 face-scale) (* 0.001 face-scale)))
     ;; sort base face vertices clockwise
