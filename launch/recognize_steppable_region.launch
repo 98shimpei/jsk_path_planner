@@ -9,7 +9,8 @@
 
   <arg name="USE_SELF_FILTER"        default="true"/>
   <arg name="SELF_FILTER_PARAM"      value="$(find jsk_path_planner)/config/jaxon_self_filter.yaml" />
-  <arg name="USE_BBOX_CLIP"          default="false" />
+  <!-- <arg name="USE_BBOX_CLIP"          default="false" /> -->
+  <arg name="USE_BBOX_CLIP"          default="true" />
   <arg name="USE_HEIGHTMAP"          default="true" />
   <arg name="INPUT_POINTCLOUD_RATE"  default="5"/>
   <arg name="POINTCLOUD_RESIZE_STEP" default="5"/>
@@ -89,40 +90,34 @@
   </group>
 
   <!-- bbox clip -->
-  <!-- <group if="$(arg USE_BBOX_CLIP)"> -->
-  <!--   <node pkg="jsk_path_planner" type="robot_bbox_sf_wh_publisher.py" -->
-  <!--         name="robot_bbox_sf_wh_publisher" output="screen"/> -->
-  <!--   <node pkg="jsk_path_planner" type="robot_bbox_sf_publisher.py" -->
-  <!--         name="robot_bbox_sf_publisher" output="screen"/> -->
-  <!-- </group> -->
-  <!-- <group ns="$(arg NODELET_MANAGER_NAME)" if="$(arg USE_BBOX_CLIP)"> -->
-  <!--   <rosparam subst_value="true"> -->
-  <!--     nodelets_$(arg NODELET_INDEX): -->
-  <!--       - name: robot_bbox_clipper_sf -->
-  <!--         type: jsk_pcl/AttentionClipper -->
-  <!--         remappings: -->
-  <!--           - from: ~input/points -->
-  <!--             to: /robot_center_pointcloud/output -->
-  <!--           - from: ~input/box -->
-  <!--             to: /robot_bbox_sf -->
-  <!--       - name: robot_center_pointcloud_bbox_clipped_sf -->
-  <!--         type: jsk_pcl/ExtractIndices -->
-  <!--         remappings: -->
-  <!--           - from: ~input -->
-  <!--             to: /robot_center_pointcloud_sf/output -->
-  <!--           - from: ~indices -->
-  <!--             to: /robot_bbox_clipper_sf/output/point_indices -->
-  <!--           - from: ~output -->
-  <!--             to: $(arg rs_name_space)/points_filtered -->
-  <!--   </rosparam> -->
-  <!-- </group> -->
+  <group if="$(arg USE_BBOX_CLIP)">
+    <include file="$(find jsk_path_planner)/launch/ar_marker_track.launch" />
+    <node pkg="jsk_path_planner" type="object_bbox_publisher.py"
+          name="object_bbox_publisher" output="screen">
+      <param name="transport_object" value="wheelbarrow" />
+    </node>
+    <node pkg="nodelet" type="nodelet" name="object_bbox_clipper"
+          args="load jsk_pcl/AttentionClipper $(arg NODELET_MANAGER_NAME)" output="screen">
+      <remap from="~input/points" to="/self_filtered_pointcloud/output" />
+      <remap from="~input/box" to="/object_bbox" />
+    </node>
+    <node pkg="nodelet" type="nodelet" name="self_filtered_pointcloud_bbox_clipped"
+          args="load jsk_pcl/ExtractIndices $(arg NODELET_MANAGER_NAME)" output="screen">
+      <remap from="~input" to="/self_filtered_pointcloud/output" />
+      <remap from="~indices" to="/object_bbox_clipper/output/point_indices" />
+      <rosparam subst_value="true">
+        negative: true
+      </rosparam>
+    </node>
+  </group>
 
   <group if="$(arg USE_HEIGHTMAP)" >
     <node name="rt_current_heightmap"
           pkg="nodelet" type="nodelet"
           args="load jsk_pcl/HeightmapConverter $(arg NODELET_MANAGER_NAME)">
       <!-- <remap from="~input" to="/robot_center_pointcloud/output" /> -->
-      <remap from="~input" to="/self_filtered_pointcloud/output" />
+      <!-- <remap from="~input" to="/self_filtered_pointcloud/output" /> -->
+      <remap from="~input" to="self_filtered_pointcloud_bbox_clipped/output" />
       <!-- <remap from="~input" to="$(arg rs_name_space)/points_filtered" /> -->
       <rosparam subst_value="true">
         min_x: -2.5
