@@ -143,6 +143,7 @@
         mask_size: 3 ## cover within 0.06m
         max_variance: 0.0002 ### (* 0.014 0.014)
         smooth_method: max_distance
+        # smooth_method: average_distance
         use_bilateral: true
         bilateral_filter_size: 4
         bilateral_sigma_color: 0.028
@@ -177,6 +178,7 @@
       <rosparam subst_value="true">
         center_frame_id: $(arg CENTER_FRAME)
         fixed_frame_id: $(arg FIXED_FRAME)
+        use_bilateral: false
       </rosparam>
     </node>
 
@@ -189,7 +191,7 @@
         max_variance: 0.0002 ### (* 0.014 0.014)
         smooth_method: max_distance
         use_bilateral: true
-        bilateral_filter_size: 4
+        bilateral_filter_size: 1
         bilateral_sigma_color: 0.028
         bilateral_sigma_space: 3
       </rosparam>
@@ -198,8 +200,8 @@
     <node name="rt_accumulated_heightmap_pointcloud"
           pkg="nodelet" type="nodelet"
           args="load jsk_pcl/HeightmapToPointCloud $(arg NODELET_MANAGER_NAME)">
-      <remap from="~input" to="rt_accumulated_heightmap/output" />
-      <!-- <remap from="~input" to="rt_filtered_accumulated_heightmap/output" /> -->
+      <!-- <remap from="~input" to="rt_accumulated_heightmap/output" /> -->
+      <remap from="~input" to="rt_filtered_accumulated_heightmap/output" />
       <rosparam>
         keep_organized: true
       </rosparam>
