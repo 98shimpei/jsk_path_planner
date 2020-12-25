@@ -310,7 +310,7 @@
         (setq combined-polygons (face+ (elt projected-polygons x) (elt projected-polygons y)))
         (if (and (eq (length combined-polygons) 1) (< height-diff height-th))
             (progn
-              (print (class (car combined-polygons)))
+              ;; (print (class (car combined-polygons)))
               (format t "polygon x area: ~A~%" (send (elt projected-polygons x) :area))
               (format t "polygon y area: ~A~%" (send (elt projected-polygons y) :area))
               (format t "combined  area: ~A~%" (send (car combined-polygons) :area))
@@ -336,8 +336,7 @@
   (dotimes (polygon-id (length polygons))
     (setq cleaned-polygons
           (nconc cleaned-polygons
-                 (list (sort-face-vertices-clockwise
-                        (polygon-msg-to-face (elt polygons polygon-id)) 1)))))
+                 (list (polygon-msg-to-face (elt polygons polygon-id))))))
   (when (> (length polygons) 1)
     (setq x 0)
     (while (< x (length polygons))
@@ -393,11 +392,12 @@
   ;;       (combine-same-height-polygons sorted-polygons (* 0.01)))
   ;; (format t "polygons after combine:  ~A~%" (length projected-polygons))
 
-  (format t "polygons before removal: ~A~%" (length sorted-polygons))
+  ;; (format t "polygons before removal: ~A~%" (length sorted-polygons))
   (setq cleaned-polygons
-        (remove-same-height-small-polygons sorted-polygons (* 0.01)))
+        (remove-same-height-small-polygons sorted-polygons 0.01))
         ;; (combine-same-height-polygons sorted-polygons (* 0.01)))
-  (format t "polygons after removal:  ~A~%" (length cleaned-polygons))
+  ;; (format t "polygons after removal:  ~A~%" (length cleaned-polygons))
+  ;; (print "removed")
 
   ;; prepare ouput triangles list
   (setq triangles (list))
@@ -411,6 +411,7 @@
     ;; (format t "i: ~A~%" i)
     ;; for debug
     (setq base-box-up-faces (list))
+    (setq exist-base-box t)
 
     ;; (setq base-face (polygon-msg-to-face (elt sorted-polygons i)))
     ;; (print (send base-face :vertices))
@@ -423,9 +424,15 @@
     ;; (setq base-face (change-face-size base-face (* -0.1 face-scale)))
     ;; (setq base-face (change-face-size base-face (* -0.1 face-scale) (* 0.08 face-scale)))
     ;; remove near vertices
-    (setq base-face (remove-near-vertices base-face (* 0.05 face-scale)))
-    (setq base-face (change-face-size base-face (* 0.05 face-scale) -1))
+    ;; (setq base-face (remove-near-vertices base-face (* 0.05 face-scale))) ;; debug
+    (setq base-face (remove-near-vertices base-face (* 0.15 face-scale))) ;; real success
+    ;; (setq base-face (change-face-size base-face (* 0.05 face-scale) -1)) ;; debug
+    ;; (setq base-face (change-face-size base-face (* 0.09 face-scale) -1)) ;; real success
+    (setq base-face (change-face-size base-face (* 0.11 face-scale) -1)) ;; real success only for stepping stones
+    ;; (print "change face size")
     ;; (setq base-face (change-face-size-use-body base-face (* 0.05 face-scale) -1))
+    (if (eq base-face nil)
+        (setq exist-base-box nil))
     ;; (setq base-face (change-face-size base-face (* 0.1 face-scale) (* 0.05 face-scale)))
     ;; (setq base-face (change-face-size base-face (* 0.05 face-scale) (* 0.001 face-scale)))
     ;; sort base face vertices clockwise
@@ -450,7 +457,7 @@
           (setq base-box-up-faces (append base-box-up-faces (list base-face)))
           ;; (print base-box-up-faces)
           )
-        (when (> i 0)
+        (when (and (> i 0) exist-base-box)
           (setq hole-candidates (list))
           (dotimes (j i)
             ;; (setq upper-face (polygon-msg-to-face (elt sorted-polygons j)))
@@ -464,7 +471,8 @@
             ;; (setq upper-face (change-face-size upper-face (* -0.1 face-scale) (* 0.03 face-scale)))
             ;; remove near vertices
             (setq upper-face (remove-near-vertices upper-face (* 0.03 face-scale)))
-            (setq upper-face (change-face-size upper-face (* -0.05 face-scale) (* 0.03 face-scale)))
+            ;; (setq upper-face (change-face-size upper-face (* -0.05 face-scale) (* 0.03 face-scale))) ;;debug
+            (setq upper-face (change-face-size upper-face (* -0.19 face-scale) (* 0.05 face-scale))) ;; real success
             ;; sort upper face vertices clockwise
             (setq upper-face (sort-face-vertices-clockwise upper-face 1))
             ;; remove near vertices
@@ -547,13 +555,13 @@
                   (setq ver-id (+ ver-id 1))
                   )
                 )
-              (format t "new-vertices' length: ~s~%" (length new-vertices))
+              ;; (format t "new-vertices' length: ~s~%" (length new-vertices))
               (if (not new-vertices) (throw :my-error nil))
               ;; (print new-vertices)
               (setq hole-candidate (instance face :init :vertices new-vertices))
               ;; (print "removed hole-face")
               ;; (print (send hole-candidate :vertices))
-              (format t "hole-candidate vertices: ~A~%" (length (send hole-candidate :vertices)))
+              ;; (format t "hole-candidate vertices: ~A~%" (length (send hole-candidate :vertices)))
               (setq hole-box
                     (make-prism
                      (reverse (cdr (reverse (send hole-candidate :vertices)))) 30))
@@ -569,6 +577,7 @@
                     ;; (print (send base-box :vertices))
                     (print "hole-box")
                     (print (/ (send hole-box :volume) 3))
+                    (setq exist-base-box nil)
                     ;; (print (send hole-box :vertices))
                     ))
               ;; (if (not hole-is-not-nil)
@@ -588,7 +597,8 @@
 
           ;; (print "final base-box")
           ;; (print base-box)
-          (when base-box
+          (when (and base-box exist-base-box)
+          ;; (when base-box
             (setq base-box-faces (send base-box :faces))
             (dotimes (face-id (length base-box-faces))
               (when (eq (elt (send (elt base-box-faces face-id) :normal) 2) 1.0)
@@ -615,7 +625,7 @@
     ;;   (length (geometry::face-to-triangle base-face)))
     )
 
-  (format t "triangles: ~A~%" (length triangles))
+  ;; (format t "triangles: ~A~%" (length triangles))
   ;; (if (= (length triangles) 0) (throw :my-error nil))
 
   ;; change face scale to original
