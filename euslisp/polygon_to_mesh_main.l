@@ -5,10 +5,13 @@
 
 (comp:compile-file-if-src-newer
   (format nil "~A/euslisp/polygon_to_mesh_utils.l"
-          (ros::rospack-find "jsk_path_planner")))
+          (ros::rospack-find "jsk_path_planner"))
+  (format nil "~A/euslisp/" (ros::rospack-find "jsk_path_planner")))
+
 (let ((old-module (find "polygon_to_mesh_utils" *loaded-modules*
                         :key #'lisp::load-module-file-name :test #'equal)))
   (if old-module (sys::unbinload old-module)))
+;; (load "/home/ohmori/.ros/polygon_to_mesh_utils.so")
 (load "polygon_to_mesh_utils")
 
 (defun callback(msg)
@@ -18,7 +21,7 @@
 
   (when (ros::get-param "~add_local_plane" nil)
     ;; x-len y-len x y z header
-    (setq local-plane (make-local-plane 2.0 2.0 0.0 0.0 -1.0 header))
+    (setq local-plane (make-local-plane 2.0 2.0 0.0 0.0 0.0 header))
     (setq polygons (nconc polygons (list local-plane)))
     )
 
@@ -111,7 +114,7 @@
   (ros::ros-info "published")
 
   ;; debug viewer
-  (setq fs (instance faceset :init :faces base-faces))
+  ;; (setq fs (instance faceset :init :faces base-faces))
   ;; (objects (list fs))
 
   ) ;; defun
