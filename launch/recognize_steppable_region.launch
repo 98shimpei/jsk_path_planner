@@ -9,7 +9,6 @@
 
   <arg name="USE_SELF_FILTER"        default="true"/>
   <arg name="SELF_FILTER_PARAM"      value="$(find jsk_path_planner)/config/jaxon_self_filter.yaml" />
-  <!-- <arg name="USE_BBOX_CLIP"          default="false" /> -->
   <arg name="USE_BBOX_CLIP"          default="true" />
   <arg name="USE_HEIGHTMAP"          default="true" />
   <arg name="INPUT_POINTCLOUD_RATE"  default="5"/>
@@ -17,6 +16,10 @@
 
   <arg name="simulation"             default="false" />
   <arg name="rs_name_space"          default="/rs_l515/depth/color" />
+
+  <!-- <arg name="HEIGHTMAP_INPUT"        default="/robot_center_pointcloud/output" /> -->
+  <!-- <arg name="HEIGHTMAP_INPUT"        default="/self_filtered_pointcloud/output" /> -->
+  <arg name="HEIGHTMAP_INPUT"        default="/self_filtered_pointcloud_bbox_clipped/output" />
 
   <group if="$(arg simulation)">
     <rosparam param="/use_sim_time">true</rosparam>
@@ -91,10 +94,14 @@
 
   <!-- bbox clip -->
   <group if="$(arg USE_BBOX_CLIP)">
-    <include file="$(find jsk_path_planner)/launch/ar_marker_track.launch" />
+    <include file="$(find jsk_path_planner)/launch/ar_marker_track.launch">
+      <arg name="marker_size" value="18" />
+    </include>
     <node pkg="jsk_path_planner" type="object_bbox_publisher.py"
           name="object_bbox_publisher" output="screen">
       <param name="transport_object" value="wheelbarrow" />
+      <param name="set_marker_id"    value="true" />
+      <param name="marker_id"        value="71" />
     </node>
     <node pkg="nodelet" type="nodelet" name="object_bbox_clipper"
           args="load jsk_pcl/AttentionClipper $(arg NODELET_MANAGER_NAME)" output="screen">
@@ -117,7 +124,8 @@
           args="load jsk_pcl/HeightmapConverter $(arg NODELET_MANAGER_NAME)">
       <!-- <remap from="~input" to="/robot_center_pointcloud/output" /> -->
       <!-- <remap from="~input" to="/self_filtered_pointcloud/output" /> -->
-      <remap from="~input" to="self_filtered_pointcloud_bbox_clipped/output" />
+      <!-- <remap from="~input" to="/self_filtered_pointcloud_bbox_clipped/output" /> -->
+      <remap from="~input" to="$(arg HEIGHTMAP_INPUT)" />
       <!-- <remap from="~input" to="$(arg rs_name_space)/points_filtered" /> -->
       <rosparam subst_value="true">
         min_x: -2.5
