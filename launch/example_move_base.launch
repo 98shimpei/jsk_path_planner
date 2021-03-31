@@ -42,6 +42,7 @@
     <param name="global_costmap/width" value="20.0" if="$(arg no_static_map)"/>
     <param name="global_costmap/height" value="20.0" if="$(arg no_static_map)"/>
 
+    <!-- if robot only -->
     <remap from="cmd_vel" to="PR2/base_controller/command" unless="$(arg biped)"/>
   </node>
 
@@ -52,10 +53,11 @@
       <param name="distance_to_cart_center" value="$(arg distance_to_cart_center)" />
       <param name="forward_or_rotate_mode"  value="$(arg forward_or_rotate_mode)"  />
     </node>
-    <!-- broad cart_center tf -->
-    <node pkg="tf" type="static_transform_publisher" name="cart_center_broadcaster"
-          args="$(arg distance_to_cart_center) 0.0 0.0 0.0 0.0 0.0 BODY cart_center 100" if="$(arg push_cart)"/>
   </group>
+
+  <!-- broad cart_center tf -->
+  <node pkg="tf" type="static_transform_publisher" name="cart_center_broadcaster"
+        args="$(arg distance_to_cart_center) 0.0 0.0 0.0 0.0 0.0 BODY cart_center 100" if="$(arg push_cart)"/>
 
   <node name="rviz" pkg="rviz" type="rviz"
         args="-d $(find jsk_path_planner)/rviz/jaxon_move_base.rviz"
