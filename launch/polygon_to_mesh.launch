@@ -1,5 +1,6 @@
 <launch>
   <arg name="publish_steppable_region" default="true" />
+  <arg name="add_local_plane" default="false" />
   <arg name="debug_view" default="false" />
   <arg name="debug_mode" default="false" />
 
@@ -9,7 +10,7 @@
     <remap from="~input" to="/organized_multi_plane_segmentation/output_refined_polygon" />
     <remap from="~meshed_polygons" to="/meshed_polygons" />
     <rosparam subst_value="true">
-      add_local_plane: false
+      add_local_plane: $(arg add_local_plane)
       debug_mode: $(arg debug_mode)
     </rosparam>
   </node>
