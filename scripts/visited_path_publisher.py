@@ -19,7 +19,9 @@ poses    = []
 while not rospy.is_shutdown():
 
   try:
-    (trans,rot) = listener.lookupTransform('/map', robot_frame, rospy.Time(0))
+    # (trans,rot) = listener.lookupTransform('/map', robot_frame, rospy.Time(0))
+    (trans,rot) = listener.lookupTransform('/odom_ground', robot_frame, rospy.Time(0))
+    # (trans,rot) = listener.lookupTransform('/choreonoid_origin', robot_frame, rospy.Time(0))
   except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
     continue
 
@@ -27,7 +29,9 @@ while not rospy.is_shutdown():
 
   pose = PoseStamped()
   pose.header.stamp    = rospy.Time.now()
-  pose.header.frame_id = '/map'
+  # pose.header.frame_id = '/map'
+  pose.header.frame_id = '/odom_ground'
+  # pose.header.frame_id = '/choreonoid_origin'
   pose.pose.position.x = trans[0]
   pose.pose.position.y = trans[1]
   pose.pose.position.z = 0
