@@ -6,6 +6,7 @@
   <include file="$(find jsk_path_planner)/launch/example_move_base.launch" >
     <arg name="biped"               value="false"/>
     <arg name="no_static_map"       value="true"/>
+    <arg name="push_cart"           value="true"/>
     <arg name="base_global_planner" value="navfn/NavfnROS"/>
     <arg name="base_local_planner"  value="dwa_local_planner/DWAPlannerROS"/>
     <!-- <arg name="base_local_planner"  value="base_local_planner/TrajectoryPlannerROS"/> -->
@@ -14,6 +15,8 @@
     <arg name="costmap_global_pointcloud_file" value="$(find jsk_path_planner)/config/pr2_costmap_global_pointcloud.yaml" />
     <arg name="costmap_local_file"             value="$(find jsk_path_planner)/config/pr2_costmap_local.yaml" />
     <arg name="rviz"                value="false" />
+    <arg name="distance_to_cart_center" value="1.45" />
+    <arg name="forward_or_rotate_mode"  value="0" />
   </include>
 
   <!-- color object recognition -->
@@ -22,8 +25,8 @@
   <!-- </include> -->
 
   <!-- path follow init -->
-  <!-- <node pkg="jsk_path_planner" type="path-follow-init.l" -->
-  <!--       name="path_follow_init" output="screen" if="$(arg init)"/> -->
+  <node pkg="jsk_path_planner" type="pr2-wheelbarrow-init.l"
+        name="pr2_wheelbarrow_init" output="screen" if="$(arg init)"/>
 
   <!-- publish heightmap gradient -->
   <!-- <node pkg="jsk_path_planner" type="calc_heightmap_gradient" -->
@@ -56,7 +59,7 @@
         name="visited_path_publisher" output="screen">
     <param name="freq" value="5" />
     <param name="save_time" value="30" />
-    <param name="robot_frame" value="/base_footprint" />
+    <param name="robot_frame" value="/cart_center" />
   </node>
 
 </launch>
