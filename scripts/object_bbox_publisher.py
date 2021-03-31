@@ -34,10 +34,14 @@ elif transport_object == "wheelbarrow":
   orientation = Quaternion(0, 0, 0, 1)
   dimensions = Vector3(0.9, 0.7, 1.1)
 else:
-  frame_id = "ar_marker_52"
-  position = Point(0.0, 0.0, 1.25)
+  # frame_id = "ar_marker_52"
+  # position = Point(0.0, 0.0, 1.25)
+  # orientation = Quaternion(0.0, 0.0, 0.0, 0.0)
+  # dimensions = Vector3(0.5, 1.0, 3.0)
+  frame_id = "BODY"
+  position = Point(0.0, 0.0, 0.0)
   orientation = Quaternion(0.0, 0.0, 0.0, 0.0)
-  dimensions = Vector3(0.5, 1.0, 3.0)
+  dimensions = Vector3(0.1, 0.1, 0.3)
 
 if set_marker_id:
   frame_id = "ar_marker_" + str(marker_id)
