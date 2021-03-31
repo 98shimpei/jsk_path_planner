@@ -14,7 +14,16 @@
               /polygon_to_mesh/meshed_polygons_view
               /steppable_region
               /steppable_region_visualizer/output
-              /landing_pose"
+              /landing_pose
+              /object_bbox
+              /lhsensor
+              /rhsensor
+              /is_stuck
+              /move_base/global_costmap/costmap
+              /move_base/local_costmap/costmap
+              /move_base/NavfnROS/plan
+              /move_base/DWAPlannerROS/local_plan
+              /visited_path"
         output="screen">
   </node>
 </launch>
