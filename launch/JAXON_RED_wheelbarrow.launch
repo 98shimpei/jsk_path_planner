@@ -1,7 +1,8 @@
 <launch>
-  <arg name="rviz" default="true" />
-  <arg name="init" default="true" />
-  <arg name="simulation" default="true" />
+  <arg name="rviz" default="false" />
+  <!-- <arg name="init" default="true" /> -->
+  <arg name="init" default="false" />
+  <arg name="simulation" default="false" />
 
   <!-- move base cart -->
   <include file="$(find jsk_path_planner)/launch/example_move_base.launch" >
@@ -10,40 +11,67 @@
     <arg name="base_global_planner" value="navfn/NavfnROS"/>
     <arg name="base_local_planner"  value="dwa_local_planner/DWAPlannerROS"/>
     <arg name="planner_file"        value="$(find jsk_path_planner)/config/planner_cart.yaml" />
-    <arg name="costmap_common_file" value="$(find jsk_path_planner)/config/costmap_common_wb.yaml" />
+    <arg name="costmap_common_file"
+         value="$(find jsk_path_planner)/config/costmap_common_wb.yaml"
+         if="$(arg simulation)"/>
+    <arg name="costmap_common_file"
+         value="$(find jsk_path_planner)/config/costmap_common_wb_real.yaml"
+         unless="$(arg simulation)"/>
+    <arg name="costmap_global_pointcloud_file"
+         value="$(find jsk_path_planner)/config/costmap_global_pointcloud_real.yaml"
+         unless="$(arg simulation)"/>
+    <arg name="costmap_global_static_file"
+         value="$(find jsk_path_planner)/config/costmap_global_static_real.yaml"
+         unless="$(arg simulation)"/>
+    <arg name="costmap_local_file"
+         value="$(find jsk_path_planner)/config/costmap_local_real.yaml"
+         unless="$(arg simulation)"/>
     <arg name="rviz"                value="false" />
-    <!-- <arg name="distance_to_cart_center" value="1.1" /> -->
-    <arg name="distance_to_cart_center" value="1.45" />
+    <arg name="distance_to_cart_center" value="1.1" />
+    <!-- <arg name="distance_to_cart_center" value="1.45" /> -->
     <!-- <arg name="forward_or_rotate_mode"  value="1" /> -->
     <arg name="forward_or_rotate_mode"  value="0" />
   </include>
 
-  <!-- color object recognition -->
-  <include file="$(find jsk_path_planner)/launch/color_object_recognition.launch" >
-    <arg name="rviz" value="false" />
-  </include>
+  <group if="$(arg simulation)">
+    <!-- color object recognition -->
+    <include file="$(find jsk_path_planner)/launch/color_object_recognition.launch" >
+      <arg name="rviz" value="false" />
+    </include>
+  </group>
 
   <!-- filter cart pointcloud -->
-  <node pkg="jsk_path_planner" type="robot_bbox_publisher.py"
-        name="robot_bbox_publisher" output="screen" >
-    <param name="transport_object" value="wheelbarrow" />
-  </node>
+  <!-- <node pkg="jsk_path_planner" type="robot_bbox_publisher.py" -->
+  <!--       name="robot_bbox_publisher" output="screen" > -->
+  <!--   <param name="transport_object" value="wheelbarrow" /> -->
+  <!-- </node> -->
 
   <!-- publish heightmap gradient -->
   <node pkg="jsk_path_planner" type="calc_heightmap_gradient"
         name="calc_heightmap_gradient" output="screen">
-    <remap from="~input" to="/accumulated_heightmap/output" />
+    <remap from="~input" to="/rt_accumulated_heightmap_odomrelative/output" />
     <remap from="~output" to="/heightmap_gradient" />
+    <!-- <param name="blur_ksize" value="7" /> -->
+    <!-- <param name="sobel_ksize" value="15" /> -->
+    <!-- <param name="erode_ksize" value="11" /> -->
+    <!-- <param name="floor_height" value="0.04" /> -->
+    <!-- <param name="grad_scale" value="10000000" /> -->
+    <!-- <param name="use_height_layer" value="true" /> -->
+    <!-- <param name="height_ksize" value="5" /> -->
+    <!-- <param name="grad_th" value="3.0" /> -->
+    <!-- <param name="height_th" value="0.15" /> -->
+    <!-- <param name="height_cost" value="0.0" /> -->
+    <!-- real -->
     <param name="blur_ksize" value="7" />
     <param name="sobel_ksize" value="15" />
     <param name="erode_ksize" value="11" />
-    <param name="floor_height" value="0.04" />
+    <param name="floor_height" value="0.0" />
     <param name="grad_scale" value="10000000" />
     <param name="use_height_layer" value="true" />
     <param name="height_ksize" value="5" />
-    <param name="grad_th" value="3.0" />
-    <param name="height_th" value="0.15" />
-    <param name="height_cost" value="0.0" />
+    <param name="grad_th" value="3" />
+    <param name="height_th" value="0.12" />
+    <param name="height_cost" value="4.0" />
   </node>
 
   <!-- consider steppable region -->
@@ -62,7 +90,7 @@
   <node pkg="jsk_path_planner" type="visited_path_publisher.py"
         name="visited_path_publisher" output="screen">
     <param name="freq" value="5" />
-    <param name="save_time" value="30" />
+    <param name="save_time" value="3000" />
     <param name="robot_frame" value="/cart_center" />
   </node>
 
