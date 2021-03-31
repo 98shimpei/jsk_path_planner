@@ -12,10 +12,10 @@ self_see_links:
     padding: .05
   - name: RLEG_LINK3
     padding: .05
-  - name: RLEG_LINK4
-    padding: .05
-  - name: RLEG_LINK5
-    padding: .05
+  # - name: RLEG_LINK4
+  #   padding: .05
+  # - name: RLEG_LINK5
+  #   padding: .05
   - name: LLEG_LINK0
     padding: .05
   - name: LLEG_LINK1
@@ -24,46 +24,46 @@ self_see_links:
     padding: .05
   - name: LLEG_LINK3
     padding: .05
-  - name: LLEG_LINK4
-    padding: .05
-  - name: LLEG_LINK5
-    padding: .05
-  - name: CHEST_LINK0
-    padding: .05
-  - name: CHEST_LINK1
-    padding: .05
-  - name: CHEST_LINK2
-    padding: .05
-  - name: HEAD_LINK0
-    padding: .05
-  - name: HEAD_LINK1
-    padding: .05
-  - name: RARM_LINK0
-    padding: .05
-  - name: RARM_LINK1
-    padding: .05
-  - name: RARM_LINK2
-    padding: .05
-  - name: RARM_LINK3
-    padding: .05
-  - name: RARM_LINK4
-    padding: .05
+  # - name: LLEG_LINK4
+  #   padding: .05
+  # - name: LLEG_LINK5
+  #   padding: .05
+  # - name: CHEST_LINK0
+  #   padding: .05
+  # - name: CHEST_LINK1
+  #   padding: .05
+  # - name: CHEST_LINK2
+  #   padding: .05
+  # - name: HEAD_LINK0
+  #   padding: .05
+  # - name: HEAD_LINK1
+  #   padding: .05
+  # - name: RARM_LINK0
+  #   padding: .05
+  # - name: RARM_LINK1
+  #   padding: .05
+  # - name: RARM_LINK2
+  #   padding: .05
+  # - name: RARM_LINK3
+  #   padding: .05
+  # - name: RARM_LINK4
+  #   padding: .05
   - name: RARM_LINK5
     padding: .05
   - name: RARM_LINK6
     padding: .05
   - name: RARM_LINK7
     padding: .05
-  - name: LARM_LINK0
-    padding: .05
-  - name: LARM_LINK1
-    padding: .05
-  - name: LARM_LINK2
-    padding: .05
-  - name: LARM_LINK3
-    padding: .05
-  - name: LARM_LINK4
-    padding: .05
+  # - name: LARM_LINK0
+  #   padding: .05
+  # - name: LARM_LINK1
+  #   padding: .05
+  # - name: LARM_LINK2
+  #   padding: .05
+  # - name: LARM_LINK3
+  #   padding: .05
+  # - name: LARM_LINK4
+  #   padding: .05
   - name: LARM_LINK5
     padding: .05
   - name: LARM_LINK6
@@ -71,14 +71,14 @@ self_see_links:
   - name: LARM_LINK7
     padding: .05
   - name: R_thk_palm
-    padding: .15
+    padding: .25
   - name: R_thk_finger1
-    padding: .15
+    padding: .25
   - name: R_thk_finger2
-    padding: .15
+    padding: .25
   - name: L_thk_palm
-    padding: .15
+    padding: .25
   - name: L_thk_finger1
-    padding: .15
+    padding: .25
   - name: L_thk_finger2
-    padding: .15
+    padding: .25
