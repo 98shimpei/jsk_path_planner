@@ -1,22 +1,25 @@
 <launch>
 
   <arg name="rviz" default="true" />
-  <arg name="SELF_FILTER_PARAM" value="$(find hrpsys_choreonoid_tutorials)/config/jaxon_self_filter.yaml" />
+  <arg name="SELF_FILTER_PARAM" value="$(find jsk_path_planner)/config/jaxon_self_filter.yaml" />
   <arg name="NODELET_MANAGER_NAME" default="self_filter_nodelet"/>
   <arg name="NODELET_INDEX"        default="0"/>
   <!-- <arg name="ROBOT_FRAME"  default="body_on_odom" /> -->
   <arg name="ROBOT_FRAME"  default="BODY" />
-  <arg name="INPUT_POINTCLOUD_RATE" default="1"/>
-  <arg name="simulation" default="true" />
+  <arg name="INPUT_POINTCLOUD_RATE" default="5"/>
+  <arg name="simulation" default="false" />
+  <!-- <arg name="chest_camera_depth_ns" default="/rs_d435/depth/color" /> -->
+  <arg name="chest_camera_depth_ns" default="/rs_l515/depth/color" />
 
   <group if="$(arg simulation)">
     <rosparam param="/use_sim_time">true</rosparam>
-    <arg name="chest_camera_depth_ns" default="/chest_camera/depth_registered" />
+    <arg name="chest_camera_depth_ns" value="/chest_camera/depth_registered" />
+    <arg name="SELF_FILTER_PARAM" value="$(find hrpsys_choreonoid_tutorials)/config/jaxon_self_filter.yaml" />
   </group>
 
-  <group unless="$(arg simulation)">
-    <arg name="chest_camera_depth_ns" default="/realsense/depth/color" />
-  </group>
+  <!-- <group unless="$(arg simulation)"> -->
+  <!--   <arg name="chest_camera_depth_ns" default="/realsense/depth/color" /> -->
+  <!-- </group> -->
 
   <!-- pointcloud pub regulator -->
   <node pkg="jsk_path_planner" type="pointcloud_pub_regulator.py"
@@ -26,16 +29,27 @@
     <param name="rate" value="$(arg INPUT_POINTCLOUD_RATE)" />
   </node>
 
-  <!-- self filter -->
-  <node pkg="robot_self_filter" type="self_filter"
-        name="chest_pointcloud_self_filter" output="screen">
-    <remap from="cloud_in"  to="$(arg chest_camera_depth_ns)/points_low_hz" />
-    <remap from="cloud_out" to="$(arg chest_camera_depth_ns)/points_filtered" />
-    <rosparam subst_value="true">
-      use_rgb: true
+  <node name="resize_points_publisher"
+        pkg="nodelet" type="nodelet"
+        args="standalone jsk_pcl/ResizePointsPublisher">
+    <remap from="~input" to="$(arg chest_camera_depth_ns)/points_low_hz"/>
+    <remap from="~output" to="$(arg chest_camera_depth_ns)/points_low_hz_resized"/>
+    <rosparam>
+      step_x: 5
+      step_y: 5
     </rosparam>
-    <rosparam command="load" file="$(arg SELF_FILTER_PARAM)" />
   </node>
+
+  <!-- self filter -->
+  <!-- <node pkg="robot_self_filter" type="self_filter" -->
+  <!--       name="chest_pointcloud_self_filter" output="screen"> -->
+  <!--   <remap from="cloud_in"  to="$(arg chest_camera_depth_ns)/points_low_hz_resized" /> -->
+  <!--   <remap from="cloud_out" to="$(arg chest_camera_depth_ns)/points_filtered" /> -->
+  <!--   <rosparam subst_value="true"> -->
+  <!--     use_rgb: true -->
+  <!--   </rosparam> -->
+  <!--   <rosparam command="load" file="$(arg SELF_FILTER_PARAM)" /> -->
+  <!-- </node> -->
 
   <!-- filter hands and knees -->
 
@@ -43,8 +57,8 @@
   <node pkg="jsk_topic_tools" type="standalone_complexed_nodelet"
         name="$(arg NODELET_MANAGER_NAME)" output="screen" />
 
-  <node pkg="jsk_path_planner" type="robot_bbox_sf_publisher.py"
-        name="robot_bbox_sf_publisher" output="screen"/>
+  <!-- <node pkg="jsk_path_planner" type="robot_bbox_sf_publisher.py" -->
+  <!--       name="robot_bbox_sf_publisher" output="screen"/> -->
 
   <group ns="$(arg NODELET_MANAGER_NAME)">
     <rosparam subst_value="true">
@@ -71,36 +85,41 @@
     </rosparam>
   </group>
 
-  <rosparam param="robot_center_pointcloud_sf" subst_value="true">
-    target_frame_id: $(arg ROBOT_FRAME)
-  </rosparam>
-  <rosparam param="robot_bbox_clipper_sf" subst_value="true">
-    use_multiple_attention: false
-    frame_id: $(arg ROBOT_FRAME)
-  </rosparam>
-  <rosparam param="robot_center_pointcloud_bbox_clipped_sf" subst_value="true">
-    negative: true
-  </rosparam>
+  <!-- <rosparam param="robot_center_pointcloud_sf" subst_value="true"> -->
+  <!--   target_frame_id: $(arg ROBOT_FRAME) -->
+  <!-- </rosparam> -->
+  <!-- <rosparam param="robot_bbox_clipper_sf" subst_value="true"> -->
+  <!--   use_multiple_attention: false -->
+  <!--   frame_id: $(arg ROBOT_FRAME) -->
+  <!-- </rosparam> -->
+  <!-- <rosparam param="robot_center_pointcloud_bbox_clipped_sf" subst_value="true"> -->
+  <!--   negative: true -->
+  <!-- </rosparam> -->
 
   <!-- accumulate pointcloud -->
   <node type="point_cloud2_assembler" pkg="laser_assembler"
         name="chest_camera_assembler">
-    <remap from="cloud" to="/robot_center_pointcloud_bbox_clipped_sf/output"/>
+    <!-- <remap from="cloud" to="/robot_center_pointcloud_bbox_clipped_sf/output"/> -->
+    <!-- <remap from="cloud" to="$(arg chest_camera_depth_ns)/points_low_hz"/> -->
+    <remap from="cloud" to="$(arg chest_camera_depth_ns)/points_low_hz_resized"/>
     <param name="max_clouds" type="int" value="400" />
     <!-- <param name="fixed_frame" type="string" value="map" /> -->
+    <param name="fixed_frame" type="string" value="rs_t265_odom_frame" />
     <!-- <param name="fixed_frame" type="string" value="odom" /> -->
-    <param name="fixed_frame" type="string" value="viso_odom" />
+    <!-- <param name="fixed_frame" type="string" value="viso_odom" /> -->
   </node>
 
   <node name="assembled_pointcloud_publisher" pkg="jsk_path_planner" type="publish_assembled_pointcloud2.py" />
 
   <!-- multiplane recognition -->
   <include file="$(find jsk_path_planner)/launch/recognize_steppable_region.launch">
-    <arg name="rviz"  value="false" />
+    <arg name="rviz"        value="false" />
+    <arg name="INPUT_CLOUD" value="$(arg chest_camera_depth_ns)/points_low_hz_resized" />
+    <!-- <arg name="INPUT_CLOUD" value="$(arg chest_camera_depth_ns)/points_filtered" /> -->
   </include>
 
   <!-- visualize -->
   <node name="rviz" pkg="rviz" type="rviz"
-        args="-d $(find jsk_path_planner)/rviz/realtime_steppable_region.rviz"
+        args="-d $(find jsk_path_planner)/rviz/l515_and_t265.rviz"
         output="screen" if="$(arg rviz)"/>
 </launch>
