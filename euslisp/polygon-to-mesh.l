@@ -1,6 +1,7 @@
 #!/usr/bin/env roseus
 
 (ros::roseus-add-msgs "jsk_recognition_msgs")
+(ros::roseus-add-msgs "safe_footstep_planner")
 
 (defun make-local-plane (x-len y-len z header)
   (setq points-msg (list))
@@ -135,7 +136,7 @@
   (instance face :init :vertices cleaned-vertices)
   )
 
-(defun make-triangles-msg (header triangles)
+(defun make-triangles-msg2 (header triangles)
   ;; prepare polygon stamped msg list
   (setq polygons-msg (list))
 
@@ -171,6 +172,39 @@
             :polygons polygons-msg)
   )
 
+(defun make-triangles-msg (header triangles)
+  ;; prepare polygon stamped msg list
+  (setq polygons-msg (list))
+
+  ;; add polygon stamped msg to list
+  (dotimes (i (length triangles))
+    ;; get triangle's vertices
+    (setq vertices (send (elt triangles i) :vertices))
+
+    ;; prepare point msg list
+    (setq points-msg (list))
+
+    ;; add point msg to list
+    (dotimes (j 3)
+      (setq points-msg
+            (nconc points-msg (list (instance geometry_msgs::Point32 :init
+                                              :x (float (elt (elt vertices j) 0))
+                                              :y (float (elt (elt vertices j) 1))
+                                              :z 0))))
+      )
+
+    ;; make polygon stamped msg and add it to the list
+    (setq polygon-msg
+          (instance geometry_msgs::Polygon :init
+                    :points points-msg))
+    (setq polygons-msg (nconc polygons-msg (list polygon-msg)))
+    )
+
+  ;; return polygon array msg
+  (instance safe_footstep_planner::PolygonArray :init
+            :polygons polygons-msg)
+  )
+
 (defun callback(msg)
 
   (setq header (send msg :header))
@@ -200,7 +234,8 @@
     ;; scale face size x1000
     (setq base-face (change-face-scale base-face face-scale))
     ;; make base face smaller
-    (setq base-face (change-face-size base-face (* -0.03 face-scale)))
+    ;; (setq base-face (change-face-size base-face (* -0.03 face-scale)))
+    (setq base-face (change-face-size base-face (* -0.1 face-scale)))
     ;; sort base face vertices clockwise
     (setq base-face (sort-face-vertices-clockwise base-face 1))
     ;; remove near vertices
@@ -219,7 +254,8 @@
             ;; scale face size x1000
             (setq upper-face (change-face-scale upper-face face-scale))
             ;; make hole larger
-            (setq upper-face (change-face-size upper-face (* 0.03 face-scale)))
+            ;; (setq upper-face (change-face-size upper-face (* 0.03 face-scale)))
+            (setq upper-face (change-face-size upper-face (* 0.1 face-scale)))
             ;; sort upper face vertices clockwise
             (setq upper-face (sort-face-vertices-clockwise upper-face 1))
             ;; remove near vertices
@@ -272,6 +308,7 @@
 
   ;; make polygon array msg of triangle meshes
   (setq triangles-msg (make-triangles-msg header triangles))
+  (setq triangles-msg2 (make-triangles-msg2 header triangles))
 
   ;; publish sorted-polygons for debug
   (setq polygon-array-msg
@@ -280,6 +317,7 @@
 
   (ros::publish "~sorted_polygons" polygon-array-msg)
   (ros::publish "~meshed_polygons" triangles-msg)
+  (ros::publish "~meshed_polygons_view" triangles-msg2)
   (ros::ros-info "published")
 
   ;; debug viewer
@@ -295,7 +333,8 @@
 ;; for debug
 (ros::advertise "~sorted_polygons" jsk_recognition_msgs::PolygonArray 1)
 
-(ros::advertise "~meshed_polygons" jsk_recognition_msgs::PolygonArray 1)
+(ros::advertise "~meshed_polygons" safe_footstep_planner::PolygonArray 1)
+(ros::advertise "~meshed_polygons_view" jsk_recognition_msgs::PolygonArray 1)
 
 (do-until-key
  (ros::spin-once))

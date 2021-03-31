@@ -3,7 +3,7 @@
 ;; choreonoid terrain env param
 (defun start-footguided-modification
    ()
- (let* ((step-time 0.7)
+  (let* ((step-time 0.7)
         (double-ratio 0.05))
    (cond ((boundp '*chidori*)
           (send *ri* :set-gait-generator-param
@@ -43,7 +43,8 @@
          :use-disturbance-compensation t
          :zmp-delay-time-const 0.05
          ;; :dc-gain 5e-4
-         :dc-gain 1e-3
+         ;; :dc-gain 1e-3
+         :dc-gain 1e-2
          :emergency-step-time #f(0.08 0.6 0.7)
          :overwritable-max-time 1.0
          :sum-d-footstep-thre #f(0.2 0.3 0.0)
@@ -112,26 +113,43 @@
 ;;          )
 ;;    ))
 
+;; (defun push-init
+;;     (&optional (use-hand? nil))
+;;   (when (boundp '*jaxon_red*)
+;;     (send *ri* :stop-impedance :arms))
+;;     ;; (send *ri* :start-grasp))
+;;   (send *ri* :autobalancerservice_stopStabilizer)
+;;   (send *ri* :stop-auto-balancer)
+;;   (send *robot* :reset-pose)
+;;   (send *robot* :fix-leg-to-coords (make-coords))
+;;   (send *robot* :arms :elbow-p :joint-angle -40)
+;;   (send *robot* :arms :shoulder-p :joint-angle 20)
+;;   (send *robot* :move-centroid-on-foot :both '(:rleg :lleg))
+;;   (send *ri* :angle-vector (send *robot* :angle-vector) 2000)
+;;   (send *ri* :wait-interpolation)
+;;   (send *ri* :set-auto-balancer-param
+;;         :is-hand-fix-mode t
+;;         :use-limb-stretch-avoidance nil
+;;         :ik-mode 1)
+;;   (if use-hand?
+;;       (send *ri* :start-auto-balancer)
+;;     (send *ri* :start-auto-balancer :limbs '(:rleg :lleg)))
+;;   (send *ri* :autobalancerservice_startStabilizer)
+;;   )
+
+;; changes for heavy object
 (defun push-init
-    (&optional (use-hand? nil))
-  (when (boundp '*jaxon_red*)
-    (send *ri* :stop-impedance :arms))
-    ;; (send *ri* :start-grasp))
-  (send *ri* :autobalancerservice_stopStabilizer)
-  (send *ri* :stop-auto-balancer)
-  (send *robot* :reset-pose)
-  (send *robot* :fix-leg-to-coords (make-coords))
-  (send *robot* :arms :elbow-p :joint-angle -40)
-  (send *robot* :arms :shoulder-p :joint-angle 20)
-  (send *robot* :move-centroid-on-foot :both '(:rleg :lleg))
+  (&optional (use-hand? nil))
+  (send *robot* :angle-vector (send *ri* :state :potentio-vector))
   (send *ri* :angle-vector (send *robot* :angle-vector) 2000)
   (send *ri* :wait-interpolation)
+  (send *ri* :autobalancerservice_stopStabilizer)
+  (send *ri* :stop-auto-balancer)
   (send *ri* :set-auto-balancer-param
-        :is-hand-fix-mode t
-        :use-limb-stretch-avoidance nil
+        :is-hand-fix-mode nil
         :ik-mode 1)
   (if use-hand?
-      (send *ri* :start-auto-balancer)
+      (send *ri* :start-auto-balancer :limbs '(:rarm :larm :rleg :lleg))
     (send *ri* :start-auto-balancer :limbs '(:rleg :lleg)))
   (send *ri* :autobalancerservice_startStabilizer)
-  )
+ )

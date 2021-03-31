@@ -21,7 +21,8 @@
 
   (when (ros::get-param "~add_local_plane" nil)
     ;; x-len y-len x y z header
-    (setq local-plane (make-local-plane 2.0 2.0 0.0 0.0 0.0 header))
+    ;; (setq local-plane (make-local-plane 2.0 2.0 0.0 0.0 0.0 header))
+    (setq local-plane (make-local-plane 4.0 3.0 0.0 0.0 0.0 header))
     (setq polygons (nconc polygons (list local-plane)))
     )
 

@@ -1,6 +1,7 @@
 #!/usr/bin/env roseus
 (require "package://hrpsys_ros_bridge_tutorials/euslisp/jaxon_red-interface.l")
-(require "package://jsk_path_planner/euslisp/walking-parameters.l")
+;; (require "package://jsk_path_planner/euslisp/walking-parameters.l")
+(load "~/prog/euslib/demo/kojio/push-recovery/push-recovery-foot-guided.l")
 (unless (boundp '*jaxon_red*)
   (jaxon_red-init)
   (setq *robot* *jaxon_red*)
@@ -8,7 +9,13 @@
 
 ;; footguided modification
 (format t "start footguided modification~%")
+
+;; simulation
 (start-footguided-modification)
+
+;; real robot
+;; (start-footguided-modification)
+
 ;; when using hand
 (push-init)
 

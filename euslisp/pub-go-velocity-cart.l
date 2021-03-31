@@ -31,6 +31,8 @@
 
   ;; (setq y (- y (* l (send angular :z))))
 
+  (setq yaw 0)
+
   ;; update command
   (send *ri* :go-velocity x y yaw)
   (format t "update command~%")
