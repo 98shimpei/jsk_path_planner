@@ -451,7 +451,7 @@
     (setq base-face (remove-near-vertices base-face (* 0.15 face-scale))) ;; real success
     ;; (setq base-face (change-face-size base-face (* 0.05 face-scale) -1)) ;; debug
     ;; (setq base-face (change-face-size base-face (* 0.09 face-scale) -1)) ;; real success
-    (setq base-face (change-face-size base-face (* 0.11 face-scale) -1)) ;; real success only for stepping stones
+    (setq base-face (change-face-size base-face (* 0.11 face-scale) (* 0.05 face-scale))) ;; real success only for stepping stones
     ;; (print "change face size")
     ;; (setq base-face (change-face-size-use-body base-face (* 0.05 face-scale) -1))
     (if (eq base-face nil)
@@ -495,7 +495,7 @@
             ;; remove near vertices
             (setq upper-face (remove-near-vertices upper-face (* 0.03 face-scale)))
             ;; (setq upper-face (change-face-size upper-face (* -0.05 face-scale) (* 0.03 face-scale))) ;;debug
-            (setq upper-face (change-face-size upper-face (* -0.19 face-scale) (* 0.05 face-scale))) ;; real success
+            (setq upper-face (change-face-size upper-face (* -0.15 face-scale) (* 0.05 face-scale))) ;; real success
             ;; sort upper face vertices clockwise
             (setq upper-face (sort-face-vertices-clockwise upper-face 1))
             ;; remove near vertices
