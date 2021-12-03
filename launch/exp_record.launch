@@ -7,7 +7,9 @@
               /tf
               /tf_static
               /rs_l515/depth/color/points_low_hz_resized
-              /rs_l515/color/image_raw
+              /rs_l515/color/image_raw/compressed
+              /rs_l515/color/camera_info
+              /rt_filtered_accumulated_heightmap/output
               /rt_accumulated_heightmap_pointcloud_odomrelative/output
               /organized_multi_plane_segmentation/output_polygon
               /organized_multi_plane_segmentation/output_refined_polygon
@@ -15,14 +17,21 @@
               /steppable_region
               /steppable_region_visualizer/output
               /landing_pose
+              /landing_pose_marker
+              /landing_height
+              /landing_target
               /object_bbox
               /lhsensor
               /rhsensor
               /is_stuck
+              /output
+              /output_polygon
               /move_base/global_costmap/costmap
               /move_base/local_costmap/costmap
               /move_base/NavfnROS/plan
-              /move_base/DWAPlannerROS/local_plan
+              /move_base/TebLocalPlannerROS/local_plan
+              /move_base/TebLocalPlannerROS/teb_markers
+              /move_base/TebLocalPlannerROS/teb_poses
               /visited_path"
         output="screen">
   </node>

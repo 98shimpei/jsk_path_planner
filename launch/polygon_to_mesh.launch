@@ -4,16 +4,15 @@
   <arg name="debug_view" default="false" />
   <arg name="debug_mode" default="false" />
 
-  <node pkg="jsk_path_planner" type="polygon_to_mesh_main.l"
-        name="polygon_to_mesh" output="screen">
-    <!-- <remap from="~input" to="/organized_multi_plane_segmentation/output_polygon" /> -->
-    <remap from="~input" to="/organized_multi_plane_segmentation/output_refined_polygon" />
-    <remap from="~meshed_polygons" to="/meshed_polygons" />
-    <rosparam subst_value="true">
-      add_local_plane: $(arg add_local_plane)
-      debug_mode: $(arg debug_mode)
-    </rosparam>
-  </node>
+  <!-- <node pkg="jsk_path_planner" type="polygon_to_mesh_main.l" -->
+  <!--       name="polygon_to_mesh" output="screen"> -->
+  <!--   <remap from="~input" to="/organized_multi_plane_segmentation/output_refined_polygon" /> -->
+  <!--   <remap from="~meshed_polygons" to="/meshed_polygons" /> -->
+  <!--   <rosparam subst_value="true"> -->
+  <!--     add_local_plane: $(arg add_local_plane) -->
+  <!--     debug_mode: $(arg debug_mode) -->
+  <!--   </rosparam> -->
+  <!-- </node> -->
 
   <node name="rviz" pkg="rviz" type="rviz"
         args="-d $(find jsk_path_planner)/rviz/steppable_region_debug.rviz"
@@ -28,7 +27,7 @@
       <remap from="~input" to="/steppable_region" />
     </node>
 
-    <node name="target_height_publisher" pkg="safe_footstep_planner" type="target_height_publisher" output="screen"/>
+    <!-- <node name="target_height_publisher" pkg="safe_footstep_planner" type="target_height_publisher" output="screen"/> -->
   </group>
 
 </launch>

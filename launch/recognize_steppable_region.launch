@@ -17,9 +17,9 @@
   <arg name="simulation"             default="false" />
   <arg name="rs_name_space"          default="/rs_l515/depth/color" />
 
-  <arg name="HEIGHTMAP_INPUT"        default="/robot_center_pointcloud/output" />
+  <!-- <arg name="HEIGHTMAP_INPUT"        default="/robot_center_pointcloud/output" /> -->
   <!-- <arg name="HEIGHTMAP_INPUT"        default="/self_filtered_pointcloud/output" /> -->
-  <!-- <arg name="HEIGHTMAP_INPUT"        default="/self_filtered_pointcloud_bbox_clipped/output" /> -->
+  <arg name="HEIGHTMAP_INPUT"        default="/self_filtered_pointcloud_bbox_clipped/output" />
 
   <group if="$(arg simulation)">
     <rosparam param="/use_sim_time">true</rosparam>
@@ -46,7 +46,7 @@
     <remap from="~input"  to="$(arg rs_name_space)/points" />
     <remap from="~output" to="$(arg rs_name_space)/points_low_hz" />
     <param name="rate" value="$(arg INPUT_POINTCLOUD_RATE)" />
-    <param name="delay_offset_ms" value="78" />
+    <param name="delay_offset_ms" value="0" />
   </node>
 
   <!-- resize pointcloud -->
@@ -95,27 +95,29 @@
 
   <!-- bbox clip -->
   <group if="$(arg USE_BBOX_CLIP)">
-    <include file="$(find jsk_path_planner)/launch/ar_marker_track.launch">
-      <arg name="marker_size" value="18" />
-    </include>
+    <!-- <include file="$(find jsk_path_planner)/launch/ar_marker_track.launch"> -->
+    <!--   <arg name="marker_size" value="18" /> -->
+    <!-- </include> -->
     <!-- <node pkg="tf" type="static_transform_publisher" name="ar_marker_71_pub" -->
     <!--       args="0.034 -0.267 1.438 -1.531 -0.126 -3.131 /rs_l515_color_optical_frame /ar_marker_71 100" /> -->
     <node pkg="jsk_path_planner" type="object_bbox_publisher.py"
           name="object_bbox_publisher" output="screen">
-      <param name="transport_object" value="wheelbarrow" />
-      <param name="set_marker_id"    value="true" />
-      <param name="marker_id"        value="71" />
-      <!-- <param name="transport_object" value="none" /> -->
-      <!-- <param name="set_marker_id"    value="false" /> -->
+      <!-- <param name="transport_object" value="wheelbarrow" /> -->
+      <!-- <param name="set_marker_id"    value="true" /> -->
+      <!-- <param name="marker_id"        value="71" /> -->
+      <param name="transport_object" value="none" />
+      <param name="set_marker_id"    value="false" />
     </node>
     <node pkg="nodelet" type="nodelet" name="object_bbox_clipper"
           args="load jsk_pcl/AttentionClipper $(arg NODELET_MANAGER_NAME)" output="screen">
-      <remap from="~input/points" to="/self_filtered_pointcloud/output" />
+      <!-- <remap from="~input/points" to="/self_filtered_pointcloud/output" /> -->
+      <remap from="~input/points" to="/robot_center_pointcloud/output" />
       <remap from="~input/box" to="/object_bbox" />
     </node>
     <node pkg="nodelet" type="nodelet" name="self_filtered_pointcloud_bbox_clipped"
           args="load jsk_pcl/ExtractIndices $(arg NODELET_MANAGER_NAME)" output="screen">
-      <remap from="~input" to="/self_filtered_pointcloud/output" />
+      <!-- <remap from="~input" to="/self_filtered_pointcloud/output" /> -->
+      <remap from="~input" to="/robot_center_pointcloud/output" />
       <remap from="~indices" to="/object_bbox_clipper/output/point_indices" />
       <rosparam subst_value="true">
         negative: true
@@ -150,8 +152,8 @@
       <rosparam subst_value="true">
         mask_size: 3 ## cover within 0.06m
         max_variance: 0.0002 ### (* 0.014 0.014)
-        smooth_method: max_distance
-        # smooth_method: average_distance
+        #smooth_method: max_distance
+        smooth_method: average_distance
         use_bilateral: true
         bilateral_filter_size: 4
         bilateral_sigma_color: 0.028
@@ -175,7 +177,7 @@
         custom_fov_h: 35.0 # fov_h and fov_v is swapped!!
         custom_fov_v: 62.0 # fov_h and fov_v is swapped!!
         # far_plane_distance: 1.5
-        far_plane_distance: 10
+        far_plane_distance: 1.0
         negative: true
       </rosparam>
     </node>
@@ -195,6 +197,7 @@
     <node name="rt_accumulated_heightmap"
           pkg="nodelet" type="nodelet"
           args="load jsk_pcl/HeightmapTimeAccumulation $(arg NODELET_MANAGER_NAME)">
+      <!-- <remap from="~input" to="/rt_current_heightmap/output" /> -->
       <remap from="~input" to="/rt_filtered_current_heightmap/output" />
       <!-- <remap from="~input/prev_pointcloud" to="/rt_frustum_culling/output_cloud" /> -->
       <remap from="~input/prev_pointcloud" to="/rt_pass_through_z/output" />
@@ -213,7 +216,7 @@
         mask_size: 3 ## cover within 0.06m
         max_variance: 0.0002 ### (* 0.014 0.014)
         smooth_method: max_distance
-        use_bilateral: true
+        use_bilateral: false
         bilateral_filter_size: 1
         bilateral_sigma_color: 0.028
         bilateral_sigma_space: 3

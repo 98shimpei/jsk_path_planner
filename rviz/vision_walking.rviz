@@ -1,20 +1,17 @@
 Panels:
   - Class: rviz/Displays
-    Help Height: 75
+    Help Height: 138
     Name: Displays
     Property Tree Widget:
       Expanded:
         - /Global Options1
-        - /Status1
-        - /PointCloud21
         - /PointCloud21/Autocompute Value Bounds1
-        - /Image1
         - /TF1/Frames1
         - /Odometry1/Shape1
         - /Odometry2/Shape1
         - /Camera1/Visibility1
       Splitter Ratio: 0.5
-    Tree Height: 676
+    Tree Height: 958
   - Class: rviz/Selection
     Name: Selection
   - Class: rviz/Tool Properties
@@ -23,7 +20,7 @@ Panels:
       - /2D Nav Goal1
       - /Publish Point1
     Name: Tool Properties
-    Splitter Ratio: 0.588679016
+    Splitter Ratio: 0.5886790156364441
   - Class: rviz/Views
     Expanded:
       - /Current View1
@@ -33,7 +30,11 @@ Panels:
     Experimental: false
     Name: Time
     SyncMode: 0
-    SyncSource: Image
+    SyncSource: Camera
+Preferences:
+  PromptSaveOnExit: true
+Toolbars:
+  toolButtonStyle: 2
 Visualization Manager:
   Class: ""
   Displays:
@@ -43,7 +44,7 @@ Visualization Manager:
       Color: 160; 160; 164
       Enabled: true
       Line Style:
-        Line Width: 0.0299999993
+        Line Width: 0.029999999329447746
         Value: Lines
       Name: Grid
       Normal Cell Count: 0
@@ -70,15 +71,13 @@ Visualization Manager:
       Enabled: true
       Invert Rainbow: false
       Max Color: 255; 255; 255
-      Max Intensity: 1
       Min Color: 0; 0; 0
-      Min Intensity: 0
       Name: PointCloud2
       Position Transformer: XYZ
       Queue Size: 10
       Selectable: true
       Size (Pixels): 3
-      Size (m): 0.00200000009
+      Size (m): 0.0020000000949949026
       Style: Flat Squares
       Topic: /rt_accumulated_heightmap_pointcloud_odomrelative/output
       Unreliable: false
@@ -87,7 +86,7 @@ Visualization Manager:
       Value: true
     - Class: rviz/Image
       Enabled: true
-      Image Topic: /rs_l515/color/image_raw
+      Image Topic: /output
       Max Value: 1
       Median window: 5
       Min Value: 0
@@ -98,271 +97,19 @@ Visualization Manager:
       Unreliable: false
       Value: true
     - Class: rviz/TF
-      Enabled: true
+      Enabled: false
       Frame Timeout: 15
       Frames:
         All Enabled: false
-        BODY:
-          Value: true
-        CHEST_LINK0:
-          Value: false
-        CHEST_LINK1:
-          Value: false
-        CHEST_LINK2:
-          Value: false
-        HEAD_LEFT_CAMERA:
-          Value: false
-        HEAD_LINK0:
-          Value: false
-        HEAD_LINK1:
-          Value: false
-        LARM_LINK0:
-          Value: false
-        LARM_LINK1:
-          Value: false
-        LARM_LINK2:
-          Value: false
-        LARM_LINK3:
-          Value: false
-        LARM_LINK4:
-          Value: false
-        LARM_LINK5:
-          Value: false
-        LARM_LINK6:
-          Value: false
-        LARM_LINK7:
-          Value: false
-        LLEG_LINK0:
-          Value: false
-        LLEG_LINK1:
-          Value: false
-        LLEG_LINK2:
-          Value: false
-        LLEG_LINK3:
-          Value: false
-        LLEG_LINK4:
-          Value: false
-        LLEG_LINK5:
-          Value: false
-        L_thk_palm:
-          Value: false
-        RARM_LINK0:
-          Value: false
-        RARM_LINK1:
-          Value: false
-        RARM_LINK2:
-          Value: false
-        RARM_LINK3:
-          Value: false
-        RARM_LINK4:
-          Value: false
-        RARM_LINK5:
-          Value: false
-        RARM_LINK6:
-          Value: false
-        RARM_LINK7:
-          Value: false
-        RLEG_LINK0:
-          Value: false
-        RLEG_LINK1:
-          Value: false
-        RLEG_LINK2:
-          Value: false
-        RLEG_LINK3:
-          Value: false
-        RLEG_LINK4:
-          Value: false
-        RLEG_LINK5:
-          Value: false
-        R_thk_palm:
-          Value: false
-        accel:
-          Value: false
-        biped_odom_particle:
-          Value: true
-        center_bottom_led_frame:
-          Value: false
-        center_top_led_frame:
-          Value: false
-        fisheye:
-          Value: false
-        gsensor:
-          Value: false
-        gyro:
-          Value: false
-        gyrometer:
-          Value: false
-        head:
-          Value: false
-        head_end_coords:
-          Value: false
-        head_hokuyo_frame:
-          Value: false
-        head_root:
-          Value: false
-        hokuyo_link:
-          Value: false
-        imu_floor:
-          Value: false
-        larm_end_coords:
-          Value: false
-        left_camera_frame:
-          Value: false
-        left_camera_optical_frame:
-          Value: false
-        left_led_frame:
-          Value: false
-        lfsensor:
-          Value: false
-        lhsensor:
-          Value: false
-        lleg_end_coords:
-          Value: false
-        mag:
-          Value: false
-        map:
-          Value: true
-        odom_ground:
-          Value: true
-        rarm_end_coords:
-          Value: false
-        rfsensor:
-          Value: false
-        rhsensor:
-          Value: false
-        right_camera_frame:
-          Value: false
-        right_camera_optical_frame:
-          Value: false
-        right_led_frame:
-          Value: false
-        rleg_end_coords:
-          Value: false
-        rs_l515_aligned_depth_to_color_frame:
-          Value: false
-        rs_l515_color_frame:
-          Value: false
-        rs_l515_color_optical_frame:
-          Value: false
-        rs_l515_depth_frame:
-          Value: false
-        rs_l515_depth_optical_frame:
-          Value: false
-        rs_l515_link:
-          Value: false
-        rs_t265_link:
-          Value: false
-        rs_t265_odom:
-          Value: false
       Marker Scale: 2
       Name: TF
       Show Arrows: false
       Show Axes: true
       Show Names: true
       Tree:
-        rs_t265_odom:
-          BODY:
-            CHEST_LINK0:
-              CHEST_LINK1:
-                CHEST_LINK2:
-                  HEAD_LINK0:
-                    HEAD_LINK1:
-                      HEAD_LEFT_CAMERA:
-                        {}
-                      head_end_coords:
-                        {}
-                      head_root:
-                        accel:
-                          {}
-                        gyro:
-                          {}
-                        head:
-                          center_bottom_led_frame:
-                            {}
-                          center_top_led_frame:
-                            {}
-                          left_camera_frame:
-                            left_camera_optical_frame:
-                              {}
-                          left_led_frame:
-                            {}
-                          right_camera_frame:
-                            right_camera_optical_frame:
-                              {}
-                          right_led_frame:
-                            {}
-                        mag:
-                          {}
-                      rs_l515_link:
-                        rs_l515_aligned_depth_to_color_frame:
-                          rs_l515_color_optical_frame:
-                            {}
-                        rs_l515_color_frame:
-                          {}
-                        rs_l515_depth_frame:
-                          rs_l515_depth_optical_frame:
-                            {}
-                      rs_t265_link:
-                        {}
-                  LARM_LINK0:
-                    LARM_LINK1:
-                      LARM_LINK2:
-                        LARM_LINK3:
-                          LARM_LINK4:
-                            LARM_LINK5:
-                              LARM_LINK6:
-                                LARM_LINK7:
-                                  L_thk_palm:
-                                    {}
-                                  larm_end_coords:
-                                    {}
-                                  lhsensor:
-                                    {}
-                  RARM_LINK0:
-                    RARM_LINK1:
-                      RARM_LINK2:
-                        RARM_LINK3:
-                          RARM_LINK4:
-                            RARM_LINK5:
-                              RARM_LINK6:
-                                RARM_LINK7:
-                                  R_thk_palm:
-                                    {}
-                                  rarm_end_coords:
-                                    {}
-                                  rhsensor:
-                                    {}
-                  fisheye:
-                    {}
-            LLEG_LINK0:
-              LLEG_LINK1:
-                LLEG_LINK2:
-                  LLEG_LINK3:
-                    LLEG_LINK4:
-                      LLEG_LINK5:
-                        lfsensor:
-                          {}
-                        lleg_end_coords:
-                          {}
-            RLEG_LINK0:
-              RLEG_LINK1:
-                RLEG_LINK2:
-                  RLEG_LINK3:
-                    RLEG_LINK4:
-                      RLEG_LINK5:
-                        rfsensor:
-                          {}
-                        rleg_end_coords:
-                          {}
-            gsensor:
-              {}
-            gyrometer:
-              imu_floor:
-                {}
-          odom_ground:
-            {}
+        {}
       Update Interval: 0
-      Value: true
+      Value: false
     - Alpha: 1
       Class: rviz/RobotModel
       Collision Enabled: false
@@ -402,6 +149,16 @@ Visualization Manager:
           Show Axes: false
           Show Trail: false
           Value: true
+        LARM_FINGER0:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        LARM_FINGER1:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
         LARM_LINK0:
           Alpha: 1
           Show Axes: false
@@ -472,22 +229,22 @@ Visualization Manager:
           Show Axes: false
           Show Trail: false
           Value: true
-        L_thk_finger1:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        L_thk_finger2:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        L_thk_palm:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
         Link Tree Style: Links in Alphabetic Order
+        RANGE_LINK:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        RARM_FINGER0:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        RARM_FINGER1:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
         RARM_LINK0:
           Alpha: 1
           Show Axes: false
@@ -558,51 +315,7 @@ Visualization Manager:
           Show Axes: false
           Show Trail: false
           Value: true
-        R_thk_finger1:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        R_thk_finger2:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        R_thk_palm:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        accel:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        center_bottom_led_frame:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        center_top_led_frame:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        fisheye:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        gyro:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        head:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
         head_end_coords:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        head_hokuyo_frame:
           Alpha: 1
           Show Axes: false
           Show Trail: false
@@ -610,32 +323,7 @@ Visualization Manager:
           Alpha: 1
           Show Axes: false
           Show Trail: false
-        hokuyo_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
         larm_end_coords:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        left_camera_frame:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        left_camera_optical_frame:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        left_led_frame:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        lfsensor:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        lhsensor:
           Alpha: 1
           Show Axes: false
           Show Trail: false
@@ -643,43 +331,11 @@ Visualization Manager:
           Alpha: 1
           Show Axes: false
           Show Trail: false
-        mag:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        motor:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
         rarm_end_coords:
           Alpha: 1
           Show Axes: false
           Show Trail: false
-        rfsensor:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        rhsensor:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        right_camera_frame:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        right_camera_optical_frame:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        right_led_frame:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
         rleg_end_coords:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        spindle:
           Alpha: 1
           Show Axes: false
           Show Trail: false
@@ -689,7 +345,7 @@ Visualization Manager:
       Update Interval: 0
       Value: true
       Visual Enabled: true
-    - Angle Tolerance: 0.100000001
+    - Angle Tolerance: 0.10000000149011612
       Class: rviz/Odometry
       Covariance:
         Orientation:
@@ -701,7 +357,7 @@ Visualization Manager:
           Scale: 1
           Value: true
         Position:
-          Alpha: 0.300000012
+          Alpha: 0.30000001192092896
           Color: 204; 51; 204
           Scale: 1
           Value: true
@@ -709,21 +365,21 @@ Visualization Manager:
       Enabled: false
       Keep: 1
       Name: Odometry
-      Position Tolerance: 0.100000001
+      Position Tolerance: 0.10000000149011612
       Shape:
         Alpha: 1
         Axes Length: 2
-        Axes Radius: 0.0199999996
+        Axes Radius: 0.019999999552965164
         Color: 255; 25; 0
-        Head Length: 0.300000012
-        Head Radius: 0.100000001
+        Head Length: 0.30000001192092896
+        Head Radius: 0.10000000149011612
         Shaft Length: 1
-        Shaft Radius: 0.0500000007
+        Shaft Radius: 0.05000000074505806
         Value: Axes
       Topic: /rs_t265/odom/sample
       Unreliable: false
       Value: false
-    - Angle Tolerance: 0.100000001
+    - Angle Tolerance: 0.10000000149011612
       Class: rviz/Odometry
       Covariance:
         Orientation:
@@ -735,7 +391,7 @@ Visualization Manager:
           Scale: 1
           Value: true
         Position:
-          Alpha: 0.300000012
+          Alpha: 0.30000001192092896
           Color: 204; 51; 204
           Scale: 1
           Value: true
@@ -743,31 +399,31 @@ Visualization Manager:
       Enabled: false
       Keep: 1
       Name: Odometry
-      Position Tolerance: 0.100000001
+      Position Tolerance: 0.10000000149011612
       Shape:
         Alpha: 1
         Axes Length: 1
-        Axes Radius: 0.100000001
+        Axes Radius: 0.10000000149011612
         Color: 0; 255; 0
-        Head Length: 0.300000012
-        Head Radius: 0.100000001
+        Head Length: 0.30000001192092896
+        Head Radius: 0.10000000149011612
         Shaft Length: 1
-        Shaft Radius: 0.0500000007
+        Shaft Radius: 0.05000000074505806
         Value: Axes
       Topic: /rs_odom
       Unreliable: false
       Value: false
-    - Alpha: 1
+    - Alpha: 0.5
       Class: jsk_rviz_plugin/PolygonArray
       Color: 25; 255; 0
       Enabled: true
       Name: SteppableRegion
-      Topic: /polygon_to_mesh/meshed_polygons_view
+      Topic: /output_polygon
       Unreliable: false
       Value: true
       coloring: Flat color
       enable lighting: true
-      normal length: 0.100000001
+      normal length: 0.10000000149011612
       only border: false
       show normal: false
     - Alpha: 1
@@ -780,7 +436,7 @@ Visualization Manager:
       Value: true
       coloring: Flat color
       enable lighting: true
-      normal length: 0.100000001
+      normal length: 0.10000000149011612
       only border: true
       show normal: false
     - Class: jsk_rviz_plugin/CameraInfo
@@ -797,15 +453,16 @@ Visualization Manager:
       not show side polygons: true
       show edges: true
       show polygons: true
+      transport hints: raw
       use image: false
     - Class: rviz/Camera
       Enabled: true
       Image Rendering: background and overlay
-      Image Topic: /rs_l515/color/image_rect_color
+      Image Topic: /rs_l515/color/image_raw
       Name: Camera
-      Overlay Alpha: 0.300000012
+      Overlay Alpha: 0.30000001192092896
       Queue Size: 2
-      Transport Hint: raw
+      Transport Hint: compressed
       Unreliable: false
       Value: true
       Visibility:
@@ -818,13 +475,16 @@ Visualization Manager:
         L_hand: true
         LocalCostmap: true
         LocalPath: true
+        Marker: true
+        MarkerArray: true
         Odometry: true
         PointCloud2: false
         PolygonArray: true
         Pose: true
+        PoseArray: true
         R_hand: true
         RobotModel: true
-        SteppableRegion: false
+        SteppableRegion: true
         TF: false
         Value: true
         VisitedPath: true
@@ -839,63 +499,65 @@ Visualization Manager:
       Value: false
       coloring: Flat color
       enable lighting: true
-      normal length: 0.100000001
+      normal length: 0.10000000149011612
       only border: true
       show normal: true
     - Alpha: 1
       Axes Length: 1
-      Axes Radius: 0.100000001
+      Axes Radius: 0.10000000149011612
       Class: rviz/Pose
       Color: 0; 170; 255
       Enabled: true
-      Head Length: 0.300000012
-      Head Radius: 0.100000001
+      Head Length: 0.30000001192092896
+      Head Radius: 0.10000000149011612
       Name: Pose
-      Shaft Length: 0.200000003
-      Shaft Radius: 0.0500000007
+      Shaft Length: 0.20000000298023224
+      Shaft Radius: 0.05000000074505806
       Shape: Arrow
       Topic: /landing_pose
       Unreliable: false
       Value: true
     - Class: jsk_rviz_plugin/BoundingBox
-      Enabled: true
+      Enabled: false
       Name: BoundingBox
       Topic: /object_bbox
       Unreliable: false
-      Value: true
-      alpha: 0.800000012
+      Value: false
+      alpha: 0.800000011920929
       color: 85; 170; 255
       coloring: Flat color
-      line width: 0.00499999989
+      line width: 0.004999999888241291
       only edge: false
       show coords: false
     - Alpha: 1
       Arrow Width: 0.5
       Class: rviz/WrenchStamped
-      Enabled: true
+      Enabled: false
       Force Arrow Scale: 1
       Force Color: 204; 51; 51
+      Hide Small Values: true
       History Length: 1
       Name: L_hand
       Topic: /lhsensor
       Torque Arrow Scale: 1
       Torque Color: 204; 204; 51
       Unreliable: false
-      Value: true
+      Value: false
     - Alpha: 1
       Arrow Width: 0.5
       Class: rviz/WrenchStamped
-      Enabled: true
+      Enabled: false
       Force Arrow Scale: 1
       Force Color: 204; 51; 51
+      Hide Small Values: true
       History Length: 1
       Name: R_hand
       Topic: /rhsensor
       Torque Arrow Scale: 1
       Torque Color: 204; 204; 51
       Unreliable: false
-      Value: true
-    - Alpha: 0.300000012
+      Value: false
+    - Alpha: 0.30000001192092896
       Class: rviz/Map
       Color Scheme: costmap
       Draw Behind: false
@@ -905,7 +567,7 @@ Visualization Manager:
       Unreliable: false
       Use Timestamp: false
       Value: true
-    - Alpha: 0.300000012
+    - Alpha: 0.30000001192092896
       Class: rviz/Map
       Color Scheme: costmap
       Draw Behind: false
@@ -920,11 +582,11 @@ Visualization Manager:
       Class: rviz/Path
       Color: 25; 255; 0
       Enabled: true
-      Head Diameter: 0.300000012
-      Head Length: 0.200000003
-      Length: 0.300000012
+      Head Diameter: 0.30000001192092896
+      Head Length: 0.20000000298023224
+      Length: 0.30000001192092896
       Line Style: Billboards
-      Line Width: 0.0299999993
+      Line Width: 0.029999999329447746
       Name: GlobalPath
       Offset:
         X: 0
@@ -932,9 +594,9 @@ Visualization Manager:
         Z: 0
       Pose Color: 255; 85; 255
       Pose Style: None
-      Radius: 0.0299999993
-      Shaft Diameter: 0.100000001
-      Shaft Length: 0.100000001
+      Radius: 0.029999999329447746
+      Shaft Diameter: 0.10000000149011612
+      Shaft Length: 0.10000000149011612
       Topic: /move_base/NavfnROS/plan
       Unreliable: false
       Value: true
@@ -943,11 +605,11 @@ Visualization Manager:
       Class: rviz/Path
       Color: 255; 0; 0
       Enabled: true
-      Head Diameter: 0.300000012
-      Head Length: 0.200000003
-      Length: 0.300000012
+      Head Diameter: 0.30000001192092896
+      Head Length: 0.20000000298023224
+      Length: 0.30000001192092896
       Line Style: Billboards
-      Line Width: 0.0500000007
+      Line Width: 0.05000000074505806
       Name: LocalPath
       Offset:
         X: 0
@@ -955,9 +617,9 @@ Visualization Manager:
         Z: 0
       Pose Color: 255; 85; 255
       Pose Style: None
-      Radius: 0.0299999993
-      Shaft Diameter: 0.100000001
-      Shaft Length: 0.100000001
+      Radius: 0.029999999329447746
+      Shaft Diameter: 0.10000000149011612
+      Shaft Length: 0.10000000149011612
       Topic: /move_base/DWAPlannerROS/local_plan
       Unreliable: false
       Value: true
@@ -966,11 +628,11 @@ Visualization Manager:
       Class: rviz/Path
       Color: 255; 170; 0
       Enabled: true
-      Head Diameter: 0.300000012
-      Head Length: 0.200000003
-      Length: 0.300000012
+      Head Diameter: 0.30000001192092896
+      Head Length: 0.20000000298023224
+      Length: 0.30000001192092896
       Line Style: Billboards
-      Line Width: 0.0500000007
+      Line Width: 0.05000000074505806
       Name: VisitedPath
       Offset:
         X: 0
@@ -978,11 +640,67 @@ Visualization Manager:
         Z: 0
       Pose Color: 255; 85; 255
       Pose Style: None
-      Radius: 0.0299999993
-      Shaft Diameter: 0.100000001
-      Shaft Length: 0.100000001
+      Radius: 0.029999999329447746
+      Shaft Diameter: 0.10000000149011612
+      Shaft Length: 0.10000000149011612
       Topic: /visited_path
       Unreliable: false
+      Value: true
+    - Class: rviz/Marker
+      Enabled: true
+      Marker Topic: /landing_pose_marker
+      Name: Marker
+      Namespaces:
+        landing_pose: true
+      Queue Size: 100
+      Value: true
+    - Class: rviz/MarkerArray
+      Enabled: true
+      Marker Topic: /markers
+      Name: MarkerArray
+      Namespaces:
+        {}
+      Queue Size: 100
+      Value: true
+    - Class: rviz/Marker
+      Enabled: true
+      Marker Topic: /move_base/TebLocalPlannerROS/teb_markers
+      Name: Marker
+      Namespaces:
+        {}
+      Queue Size: 100
+      Value: true
+    - Alpha: 1
+      Arrow Length: 0.30000001192092896
+      Axes Length: 0.30000001192092896
+      Axes Radius: 0.009999999776482582
+      Class: rviz/PoseArray
+      Color: 255; 25; 0
+      Enabled: true
+      Head Length: 0.07000000029802322
+      Head Radius: 0.029999999329447746
+      Name: PoseArray
+      Shaft Length: 0.23000000417232513
+      Shaft Radius: 0.009999999776482582
+      Shape: Arrow (Flat)
+      Topic: /move_base/TebLocalPlannerROS/teb_poses
+      Unreliable: false
+      Value: true
+    - Class: rviz/Marker
+      Enabled: true
+      Marker Topic: /marker7
+      Name: Marker
+      Namespaces:
+        {}
+      Queue Size: 100
+      Value: true
+    - Class: rviz/Marker
+      Enabled: true
+      Marker Topic: /marker8
+      Name: Marker
+      Namespaces:
+        {}
+      Queue Size: 100
       Value: true
   Enabled: true
   Global Options:
@@ -999,7 +717,10 @@ Visualization Manager:
     - Class: rviz/FocusCamera
     - Class: rviz/Measure
     - Class: rviz/SetInitialPose
+      Theta std deviation: 0.2617993950843811
       Topic: /initialpose
+      X std deviation: 0.5
+      Y std deviation: 0.5
     - Class: rviz/SetGoal
       Topic: /move_base_simple/goal
     - Class: rviz/PublishPoint
@@ -1009,37 +730,37 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 7.36386013
+      Distance: 2.5355310440063477
       Enable Stereo Rendering:
-        Stereo Eye Separation: 0.0599999987
+        Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 1.19878638
-        Y: -0.240311474
-        Z: 0.0387731194
+        X: 1.9403622150421143
+        Y: -0.2549593448638916
+        Z: 0.8435555696487427
       Focal Shape Fixed Size: false
-      Focal Shape Size: 0.0500000007
+      Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
-      Near Clip Distance: 0.00999999978
-      Pitch: 0.794796526
+      Near Clip Distance: 0.009999999776482582
+      Pitch: 0.03479744493961334
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 1.08358419
+      Yaw: 4.688595294952393
     Saved: ~
 Window Geometry:
   Camera:
     collapsed: false
   Displays:
     collapsed: false
-  Height: 1176
+  Height: 2104
   Hide Left Dock: false
   Hide Right Dock: false
   Image:
     collapsed: false
-  QMainWindow State: 000000ff00000000fd00000004000000000000016a0000040efc0200000009fb0000001200530065006c0065006300740069006f006e00000001e10000009b0000006100fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed000001df00000185000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c006100790073010000002800000330000000d700fffffffb0000000a00560069006500770073010000035e000000d8000000ad00fffffffb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c0000026100000001000002190000040efc0200000005fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a0049006d0061006700650100000028000001fc0000001600fffffffb0000000c00430061006d006500720061010000022a0000020c0000001600fffffffb0000000a0049006d00610067006501000000280000040e0000000000000000fb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e100000197000000030000073f0000003efc0100000002fb0000000800540069006d006501000000000000073f0000030000fffffffb0000000800540069006d00650100000000000004500000000000000000000003b00000040e00000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  QMainWindow State: 000000ff00000000fd0000000400000000000001f700000730fc0200000009fb0000001200530065006c0065006300740069006f006e00000001e10000009b000000b000fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed000001df00000185000000b0fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c006100790073010000006e000004b60000018200fffffffb0000000a0056006900650077007301000005300000026e0000013200fffffffb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c0000026100000001000002db00000730fc0200000005fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a0049006d006100670065010000006e000003840000002600fffffffb0000000c00430061006d00650072006101000003fe000003a00000002600fffffffb0000000a0049006d00610067006501000000280000040e0000000000000000fb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e1000001970000000300000f0000000060fc0100000002fb0000000800540069006d0065010000000000000f000000057100fffffffb0000000800540069006d0065010000000000000450000000000000000000000a160000073000000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
   Selection:
     collapsed: false
   Time:
@@ -1048,6 +769,6 @@ Window Geometry:
     collapsed: false
   Views:
     collapsed: false
-  Width: 1855
-  X: 1985
-  Y: 24
+  Width: 3840
+  X: 3840
+  Y: 0

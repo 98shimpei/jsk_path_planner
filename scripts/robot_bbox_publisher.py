@@ -30,9 +30,12 @@ elif transport_object == "wheelbarrow":
   orientation = Quaternion(0.0, 0.0, 0.0, 0.0)
   dimensions = Vector3(2.2, 1.5, 3.0)
 else:
-  position = Point(0.0, 0.0, 1.25)
+  #position = Point(0.0, 0.0, 1.25)
+  #orientation = Quaternion(0.0, 0.0, 0.0, 0.0)
+  #dimensions = Vector3(0.5, 1.0, 3.0)
+  position = Point(0.2, 0.0, 1.25)
   orientation = Quaternion(0.0, 0.0, 0.0, 0.0)
-  dimensions = Vector3(0.5, 1.0, 3.0)
+  dimensions = Vector3(2.0, 1.0, 4.0)
 
 bbox_msg.pose.position = position
 bbox_msg.pose.orientation = orientation
