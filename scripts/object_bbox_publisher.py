@@ -39,7 +39,7 @@ else:
   # orientation = Quaternion(0.0, 0.0, 0.0, 0.0)
   # dimensions = Vector3(0.5, 1.0, 3.0)
   frame_id = "BODY"
-  #position = Point(0.4, 0.0, 0.1)
+  #position = Point(0.4, 0.0, 0.1) #box
   #orientation = Quaternion(0.0, 0.0, 0.0, 1.0)
   #dimensions = Vector3(1.0, 1.0, 1.6)
   #position = Point(0.9, 0.0, -0.1)
@@ -48,9 +48,12 @@ else:
   #position = Point(0, 0, 0)
   #orientation = Quaternion(0.0, 0.0, 0.0, 1.0)
   #dimensions = Vector3(0.8, 1.0, 1.5)
-  position = Point(0.9, 0.0, -0.3)
+  #position = Point(0.9, 0.0, -0.3)
+  #orientation = Quaternion(0.0, 0.0, 0.0, 1.0)
+  #dimensions = Vector3(1.7, 1.5, 2.7)
+  position = Point(0, 0.0, 0)
   orientation = Quaternion(0.0, 0.0, 0.0, 1.0)
-  dimensions = Vector3(1.7, 1.5, 2.7)
+  dimensions = Vector3(1.0, 1.0, 1.2)
   print("koko")
 
 if set_marker_id:

@@ -21,11 +21,11 @@
   <!-- <arg name="HEIGHTMAP_INPUT"        default="/self_filtered_pointcloud/output" /> -->
   <arg name="HEIGHTMAP_INPUT"        default="/self_filtered_pointcloud_bbox_clipped/output" />
 
-  <group if="$(arg simulation)">
-    <rosparam param="/use_sim_time">true</rosparam>
-    <arg name="rs_name_space"        value="/chest_camera/depth_registered" />
-    <arg name="SELF_FILTER_PARAM"    value="$(find hrpsys_choreonoid_tutorials)/config/jaxon_self_filter.yaml" />
-  </group>
+  <!-- <group if="$(arg simulation)"> -->
+  <!--   <rosparam param="/use_sim_time">true</rosparam> -->
+  <!--   <arg name="rs_name_space"        value="/chest_camera/depth_registered" /> -->
+  <!--   <arg name="SELF_FILTER_PARAM"    value="$(find hrpsys_choreonoid_tutorials)/config/jaxon_self_filter.yaml" /> -->
+  <!-- </group> -->
 
   <!-- nodelet manager -->
   <node name="$(arg NODELET_MANAGER_NAME)"
@@ -43,7 +43,8 @@
   <!-- pointcloud pub regulator -->
   <node pkg="jsk_path_planner" type="pointcloud_pub_regulator.py"
         name="pointcloud_pub_regulator" output="screen">
-    <remap from="~input"  to="$(arg rs_name_space)/points" />
+    <remap from="~input"  to="$(arg rs_name_space)/points" unless="$(arg simulation)"/>
+    <remap from="~input"  to="/rs_l515/depth_registered/points" if="$(arg simulation)"/>
     <remap from="~output" to="$(arg rs_name_space)/points_low_hz" />
     <param name="rate" value="$(arg INPUT_POINTCLOUD_RATE)" />
     <param name="delay_offset_ms" value="0" />
@@ -162,12 +163,33 @@
     </node>
 
     <node pkg="nodelet" type="nodelet" name="rt_frustum_culling"
-          args="load jsk_pcl/FrustumCulling $(arg NODELET_MANAGER_NAME)" output="screen">
+          args="load jsk_pcl/FrustumCulling $(arg NODELET_MANAGER_NAME)" output="screen" unless="$(arg simulation)">
       <remap from="~input" to="/rt_accumulated_heightmap_pointcloud/output" />
       <!-- <remap from="~info" to="/rs_l515/depth/camera_info" /> -->
       <remap from="~info" to="/rs_l515/color/camera_info" />
       <rosparam subst_value="true">
         camera_link_frame: rs_l515_depth_frame
+        use_asynchronous: true
+        # use_asynchronous: false
+        # use_approximate: true
+        max_queue_size: 100
+        # custom_fov_h: 70.0
+        # custom_fov_v: 43.0
+        custom_fov_h: 35.0 # fov_h and fov_v is swapped!!
+        custom_fov_v: 62.0 # fov_h and fov_v is swapped!!
+        # far_plane_distance: 1.5
+        far_plane_distance: 1.0
+        negative: true
+      </rosparam>
+    </node>
+    <node pkg="nodelet" type="nodelet" name="rt_frustum_culling"
+          args="load jsk_pcl/FrustumCulling $(arg NODELET_MANAGER_NAME)" output="screen" if="$(arg simulation)">
+      <remap from="~input" to="/rt_accumulated_heightmap_pointcloud/output" />
+      <!-- <remap from="~info" to="/rs_l515/depth/camera_info" /> -->
+      <remap from="~info" to="/rs_l515/color/camera_info" />
+      <rosparam subst_value="true">
+        <!-- camera_link_frame: rs_l515_depth_frame -->
+        camera_link_frame: rs_l515_depth_optical_frame
         use_asynchronous: true
         # use_asynchronous: false
         # use_approximate: true

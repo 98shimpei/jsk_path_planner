@@ -27,7 +27,7 @@
       <remap from="~input" to="/steppable_region" />
     </node>
 
-    <!-- <node name="target_height_publisher" pkg="safe_footstep_planner" type="target_height_publisher" output="screen"/> -->
+    <node name="target_height_publisher" pkg="safe_footstep_planner" type="target_height_publisher" output="screen"/>
   </group>
 
 </launch>
