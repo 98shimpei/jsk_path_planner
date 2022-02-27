@@ -163,27 +163,7 @@
     </node>
 
     <node pkg="nodelet" type="nodelet" name="rt_frustum_culling"
-          args="load jsk_pcl/FrustumCulling $(arg NODELET_MANAGER_NAME)" output="screen" unless="$(arg simulation)">
-      <remap from="~input" to="/rt_accumulated_heightmap_pointcloud/output" />
-      <!-- <remap from="~info" to="/rs_l515/depth/camera_info" /> -->
-      <remap from="~info" to="/rs_l515/color/camera_info" />
-      <rosparam subst_value="true">
-        camera_link_frame: rs_l515_depth_frame
-        use_asynchronous: true
-        # use_asynchronous: false
-        # use_approximate: true
-        max_queue_size: 100
-        # custom_fov_h: 70.0
-        # custom_fov_v: 43.0
-        custom_fov_h: 35.0 # fov_h and fov_v is swapped!!
-        custom_fov_v: 62.0 # fov_h and fov_v is swapped!!
-        # far_plane_distance: 1.5
-        far_plane_distance: 1.0
-        negative: true
-      </rosparam>
-    </node>
-    <node pkg="nodelet" type="nodelet" name="rt_frustum_culling"
-          args="load jsk_pcl/FrustumCulling $(arg NODELET_MANAGER_NAME)" output="screen" if="$(arg simulation)">
+          args="load jsk_pcl/FrustumCulling $(arg NODELET_MANAGER_NAME)" output="screen">
       <remap from="~input" to="/rt_accumulated_heightmap_pointcloud/output" />
       <!-- <remap from="~info" to="/rs_l515/depth/camera_info" /> -->
       <remap from="~info" to="/rs_l515/color/camera_info" />
@@ -198,8 +178,8 @@
         # custom_fov_v: 43.0
         custom_fov_h: 35.0 # fov_h and fov_v is swapped!!
         custom_fov_v: 62.0 # fov_h and fov_v is swapped!!
-        # far_plane_distance: 1.5
-        far_plane_distance: 1.0
+        far_plane_distance: 1.5
+        #far_plane_distance: 1.0
         negative: true
       </rosparam>
     </node>
@@ -210,8 +190,8 @@
       <remap from="~input" to="/rt_frustum_culling/output_cloud"/>
       <rosparam>
         filter_field_name: z
-        filter_limit_min: -0.1
-        filter_limit_max: 0.5
+        filter_limit_min: -2.1
+        filter_limit_max: 4.5
         filter_limit_negative: False
       </rosparam>
     </node>
@@ -255,30 +235,40 @@
       </rosparam>
     </node>
 
+    <node name="rt_accumulated_heightmap_triming"
+          pkg="nodelet" type="nodelet"
+          args="load jsk_pcl/HeightmapConverter $(arg NODELET_MANAGER_NAME)">
+      <remap from="~input" to="rt_accumulated_heightmap_pointcloud/output" />
+      <rosparam subst_value="true">
+        min_x: -1.0
+        max_x:  1.0
+        min_y: -1.0
+        max_y:  1.0
+        resolution_x: 200 ## 0.01 m/pixel
+        resolution_y: 200 ## 0.01 m/pixel
+        use_projected_center: false
+      </rosparam>
+    </node>
+
+    <node name="rt_accumulated_heightmap_pointcloud_triming"
+          pkg="nodelet" type="nodelet"
+          args="load jsk_pcl/HeightmapToPointCloud $(arg NODELET_MANAGER_NAME)">
+      <!-- <remap from="~input" to="rt_accumulated_heightmap/output" /> -->
+      <remap from="~input" to="rt_accumulated_heightmap_triming/output" />
+      <rosparam>
+        keep_organized: true
+      </rosparam>
+    </node>
+
     <!-- this is not required if target_frame_id is $(arg CENTER_FRAME) -->
     <!-- [tmp!!] convert to FIXED_FRAME -->
     <!-- This is for fixing steppable region while walking -->
     <node name="rt_accumulated_heightmap_pointcloud_odomrelative"
           pkg="nodelet" type="nodelet"
           args="load jsk_pcl_utils/TfTransformCloud $(arg NODELET_MANAGER_NAME)">
-      <remap from="~input" to="/rt_accumulated_heightmap_pointcloud/output" />
+      <remap from="~input" to="/rt_accumulated_heightmap_pointcloud_triming/output" />
       <rosparam subst_value="true">
         target_frame_id: $(arg FIXED_FRAME)
-      </rosparam>
-    </node>
-
-    <node name="rt_accumulated_heightmap_odomrelative"
-          pkg="nodelet" type="nodelet"
-          args="load jsk_pcl/HeightmapConverter $(arg NODELET_MANAGER_NAME)">
-      <remap from="~input" to="rt_accumulated_heightmap_pointcloud_odomrelative/output" />
-      <rosparam subst_value="true">
-        min_x: -1.5
-        max_x:  3.5
-        min_y: -2.5
-        max_y:  2.5
-        resolution_x: 500 ## 0.01 m/pixel
-        resolution_y: 500 ## 0.01 m/pixel
-        use_projected_center: false
       </rosparam>
     </node>
 
