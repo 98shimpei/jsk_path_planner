@@ -155,10 +155,10 @@
         max_variance: 0.0002 ### (* 0.014 0.014)
         #smooth_method: max_distance
         smooth_method: average_distance
-        use_bilateral: true
-        bilateral_filter_size: 4
-        bilateral_sigma_color: 0.028
-        bilateral_sigma_space: 3
+        use_bilateral: false
+        # bilateral_filter_size: 4
+        # bilateral_sigma_color: 0.028
+        # bilateral_sigma_space: 3
       </rosparam>
     </node>
 
