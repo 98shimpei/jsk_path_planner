@@ -1,0 +1,309 @@
+<launch>
+
+  <arg name="rviz"                   default="false" />
+  <arg name="ROBOT_FRAME"            default="BODY" />
+  <arg name="CENTER_FRAME"           default="body_on_odom" />
+  <arg name="FIXED_FRAME"            default="odom_ground" />
+  <arg name="NODELET_MANAGER_NAME"   default="recognize_steppable_region_nodelet"/>
+  <arg name="NODELET_INDEX"          default="0"/>
+
+  <arg name="USE_SELF_FILTER"        default="true"/>
+  <arg name="SELF_FILTER_PARAM"      value="$(find jsk_path_planner)/config/jaxon_self_filter.yaml" />
+  <arg name="USE_BBOX_CLIP"          default="true" />
+  <arg name="USE_HEIGHTMAP"          default="true" />
+  <arg name="INPUT_POINTCLOUD_RATE"  default="5"/>
+  <arg name="POINTCLOUD_RESIZE_STEP" default="2"/>
+
+  <arg name="simulation"             default="false" />
+  <arg name="rs_name_space"          default="/rs_l515/depth/color" />
+
+  <!-- <arg name="HEIGHTMAP_INPUT"        default="/robot_center_pointcloud/output" /> -->
+  <!-- <arg name="HEIGHTMAP_INPUT"        default="/self_filtered_pointcloud/output" /> -->
+  <arg name="HEIGHTMAP_INPUT"        default="/self_filtered_pointcloud_bbox_clipped/output" />
+
+  <!-- <group if="$(arg simulation)"> -->
+  <!--   <rosparam param="/use_sim_time">true</rosparam> -->
+  <!--   <arg name="rs_name_space"        value="/chest_camera/depth_registered" /> -->
+  <!--   <arg name="SELF_FILTER_PARAM"    value="$(find hrpsys_choreonoid_tutorials)/config/jaxon_self_filter.yaml" /> -->
+  <!-- </group> -->
+
+  <!-- nodelet manager -->
+  <node name="$(arg NODELET_MANAGER_NAME)"
+        pkg="nodelet" type="nodelet"
+        args="manager"/>
+
+  <!-- publish CENTER_FRAME -->
+  <node pkg="jsk_robot_startup" type="body_on_odom_publisher.py" name="body_on_odom_publisher"
+        output="screen" respawn="true">
+    <param name="~robot_frame"        value="$(arg ROBOT_FRAME)"/>
+    <param name="~odom_ground_frame"  value="$(arg FIXED_FRAME)"/>
+    <param name="~rate"               value="100"/>
+  </node>
+
+  <!-- pointcloud pub regulator -->
+  <node pkg="jsk_path_planner" type="pointcloud_pub_regulator.py"
+        name="pointcloud_pub_regulator" output="screen">
+    <remap from="~input"  to="$(arg rs_name_space)/points" unless="$(arg simulation)"/>
+    <remap from="~input"  to="/rs_l515/depth_registered/points" if="$(arg simulation)"/>
+    <remap from="~output" to="$(arg rs_name_space)/points_low_hz" />
+    <param name="rate" value="$(arg INPUT_POINTCLOUD_RATE)" />
+    <param name="delay_offset_ms" value="0" />
+  </node>
+
+  <!-- resize pointcloud -->
+  <node name="resize_points_publisher"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/ResizePointsPublisher $(arg NODELET_MANAGER_NAME)">
+    <remap from="~input" to="$(arg rs_name_space)/points_low_hz"/>
+    <remap from="~output" to="$(arg rs_name_space)/points_low_hz_resized"/>
+    <rosparam subst_value="true">
+      step_x: $(arg POINTCLOUD_RESIZE_STEP)
+      step_y: $(arg POINTCLOUD_RESIZE_STEP)
+    </rosparam>
+  </node>
+
+  <!-- transform pointcloud to robot center -->
+  <node pkg="nodelet" type="nodelet" name="robot_center_pointcloud"
+        args="load jsk_pcl/TfTransformCloud $(arg NODELET_MANAGER_NAME)" output="screen">
+    <remap from="~input" to="$(arg rs_name_space)/points_low_hz" />
+    <rosparam subst_value="true">
+      target_frame_id: $(arg CENTER_FRAME)
+      # target_frame_id: $(arg ROBOT_FRAME)
+    </rosparam>
+  </node>
+
+  <!-- self filter -->
+  <group if="$(arg USE_SELF_FILTER)">
+    <node pkg="robot_self_filter" type="self_filter"
+          name="robot_center_pointcloud_sf" output="screen">
+      <!-- <remap from="cloud_in"  to="$(arg rs_name_space)/points_low_hz_resized" /> -->
+      <remap from="cloud_in"  to="/robot_center_pointcloud/output" />
+      <remap from="cloud_out" to="$(arg rs_name_space)/points_filtered" />
+      <rosparam subst_value="true">
+        use_rgb: true
+      </rosparam>
+      <rosparam command="load" file="$(arg SELF_FILTER_PARAM)" />
+    </node>
+
+    <node pkg="nodelet" type="nodelet" name="self_filtered_pointcloud"
+          args="load jsk_pcl/TfTransformCloud $(arg NODELET_MANAGER_NAME)" output="screen">
+      <remap from="~input" to="$(arg rs_name_space)/points_filtered" />
+      <rosparam subst_value="true">
+        target_frame_id: $(arg CENTER_FRAME)
+      </rosparam>
+    </node>
+  </group>
+
+  <!-- bbox clip -->
+  <group if="$(arg USE_BBOX_CLIP)">
+    <!-- <include file="$(find jsk_path_planner)/launch/ar_marker_track.launch"> -->
+    <!--   <arg name="marker_size" value="18" /> -->
+    <!-- </include> -->
+    <!-- <node pkg="tf" type="static_transform_publisher" name="ar_marker_71_pub" -->
+    <!--       args="0.034 -0.267 1.438 -1.531 -0.126 -3.131 /rs_l515_color_optical_frame /ar_marker_71 100" /> -->
+    <node pkg="jsk_path_planner" type="object_bbox_publisher.py"
+          name="object_bbox_publisher" output="screen">
+      <!-- <param name="transport_object" value="wheelbarrow" /> -->
+      <!-- <param name="set_marker_id"    value="true" /> -->
+      <!-- <param name="marker_id"        value="71" /> -->
+      <param name="transport_object" value="none" />
+      <param name="set_marker_id"    value="false" />
+    </node>
+    <node pkg="nodelet" type="nodelet" name="object_bbox_clipper"
+          args="load jsk_pcl/AttentionClipper $(arg NODELET_MANAGER_NAME)" output="screen">
+      <!-- <remap from="~input/points" to="/self_filtered_pointcloud/output" /> -->
+      <remap from="~input/points" to="/robot_center_pointcloud/output" />
+      <remap from="~input/box" to="/object_bbox" />
+    </node>
+    <node pkg="nodelet" type="nodelet" name="self_filtered_pointcloud_bbox_clipped"
+          args="load jsk_pcl/ExtractIndices $(arg NODELET_MANAGER_NAME)" output="screen">
+      <!-- <remap from="~input" to="/self_filtered_pointcloud/output" /> -->
+      <remap from="~input" to="/robot_center_pointcloud/output" />
+      <remap from="~indices" to="/object_bbox_clipper/output/point_indices" />
+      <rosparam subst_value="true">
+        negative: true
+      </rosparam>
+    </node>
+  </group>
+
+  <group if="$(arg USE_HEIGHTMAP)" >
+    <node name="rt_current_heightmap"
+          pkg="nodelet" type="nodelet"
+          args="load jsk_pcl/HeightmapConverter $(arg NODELET_MANAGER_NAME)">
+      <!-- <remap from="~input" to="/robot_center_pointcloud/output" /> -->
+      <!-- <remap from="~input" to="/self_filtered_pointcloud/output" /> -->
+      <!-- <remap from="~input" to="/self_filtered_pointcloud_bbox_clipped/output" /> -->
+      <remap from="~input" to="$(arg HEIGHTMAP_INPUT)" />
+      <!-- <remap from="~input" to="$(arg rs_name_space)/points_filtered" /> -->
+      <rosparam subst_value="true">
+        min_x:  0.5
+        max_x:  3.5
+        min_y: -2.5
+        max_y:  2.5
+        resolution_x: 300 ## 0.01 m/pixel
+        resolution_y: 500 ## 0.01 m/pixel
+        use_projected_center: false
+      </rosparam>
+    </node>
+
+    <node name="rt_filtered_current_heightmap"
+          pkg="nodelet" type="nodelet"
+          args="load jsk_pcl/HeightmapMorphologicalFiltering $(arg NODELET_MANAGER_NAME)">
+      <remap from="~input" to="/rt_current_heightmap/output" />
+      <rosparam subst_value="true">
+        mask_size: 3 ## cover within 0.06m
+        max_variance: 0.0002 ### (* 0.014 0.014)
+        #smooth_method: max_distance
+        smooth_method: average_distance
+        use_bilateral: false
+        # bilateral_filter_size: 4
+        # bilateral_sigma_color: 0.028
+        # bilateral_sigma_space: 3
+      </rosparam>
+    </node>
+
+    <node name="rt_current_heightmap_pointcloud"
+          pkg="nodelet" type="nodelet"
+          args="load jsk_pcl/HeightmapToPointCloud $(arg NODELET_MANAGER_NAME)">
+      <!-- <remap from="~input" to="rt_accumulated_heightmap/output" /> -->
+      <remap from="~input" to="rt_filtered_current_heightmap/output" />
+      <rosparam>
+        keep_organized: true
+      </rosparam>
+    </node>
+
+    <node pkg="nodelet" type="nodelet" name="rt_frustum_culling"
+          args="load jsk_pcl/FrustumCulling $(arg NODELET_MANAGER_NAME)" output="screen">
+      <remap from="~input" to="/rt_accumulated_heightmap_pointcloud/output" />
+      <!-- <remap from="~info" to="/rs_l515/depth/camera_info" /> -->
+      <remap from="~info" to="/rs_l515/color/camera_info" />
+      <rosparam subst_value="true">
+        <!-- camera_link_frame: rs_l515_depth_frame -->
+        camera_link_frame: rs_l515_depth_optical_frame
+        use_asynchronous: true
+        # use_asynchronous: false
+        # use_approximate: true
+        max_queue_size: 100
+        # custom_fov_h: 70.0
+        # custom_fov_v: 43.0
+        custom_fov_h: 35.0 # fov_h and fov_v is swapped!!
+        custom_fov_v: 62.0 # fov_h and fov_v is swapped!!
+        far_plane_distance: 1.5
+        #far_plane_distance: 1.0
+        negative: true
+      </rosparam>
+    </node>
+
+    <node name="rt_pass_through_z"
+          pkg="nodelet" type="nodelet"
+          args="load pcl/PassThrough $(arg NODELET_MANAGER_NAME)">
+      <remap from="~input" to="/rt_frustum_culling/output_cloud"/>
+      <rosparam>
+        filter_field_name: z
+        filter_limit_min: -2.1
+        filter_limit_max: 4.5
+        filter_limit_negative: False
+      </rosparam>
+    </node>
+
+    <node name="rt_accumulated_heightmap"
+          pkg="nodelet" type="nodelet"
+          args="load jsk_pcl/HeightmapTimeAccumulation $(arg NODELET_MANAGER_NAME)">
+      <!-- <remap from="~input" to="/rt_current_heightmap/output" /> -->
+      <remap from="~input" to="/rt_filtered_current_heightmap/output" />
+      <!-- <remap from="~input/prev_pointcloud" to="/rt_frustum_culling/output_cloud" /> -->
+      <remap from="~input/prev_pointcloud" to="/rt_pass_through_z/output" />
+      <rosparam subst_value="true">
+        center_frame_id: $(arg CENTER_FRAME)
+        fixed_frame_id: $(arg FIXED_FRAME)
+        use_bilateral: false
+      </rosparam>
+    </node>
+
+    <node name="rt_filtered_accumulated_heightmap"
+          pkg="nodelet" type="nodelet"
+          args="load jsk_pcl/HeightmapMorphologicalFiltering $(arg NODELET_MANAGER_NAME)">
+      <remap from="~input" to="/rt_accumulated_heightmap/output" />
+      <rosparam subst_value="true">
+        mask_size: 3 ## cover within 0.06m
+        max_variance: 0.0002 ### (* 0.014 0.014)
+        smooth_method: max_distance
+        use_bilateral: false
+        bilateral_filter_size: 1
+        bilateral_sigma_color: 0.028
+        bilateral_sigma_space: 3
+      </rosparam>
+    </node>
+
+    <node name="rt_accumulated_heightmap_pointcloud"
+          pkg="nodelet" type="nodelet"
+          args="load jsk_pcl/HeightmapToPointCloud $(arg NODELET_MANAGER_NAME)">
+      <!-- <remap from="~input" to="rt_accumulated_heightmap/output" /> -->
+      <remap from="~input" to="rt_filtered_accumulated_heightmap/output" />
+      <rosparam>
+        keep_organized: true
+      </rosparam>
+    </node>
+
+    <node name="rt_accumulated_heightmap_triming"
+          pkg="nodelet" type="nodelet"
+          args="load jsk_pcl/HeightmapConverter $(arg NODELET_MANAGER_NAME)">
+      <remap from="~input" to="rt_accumulated_heightmap_pointcloud/output" />
+      <rosparam subst_value="true">
+        min_x: -1.0
+        max_x:  1.0
+        min_y: -1.0
+        max_y:  1.0
+        resolution_x: 200 ## 0.01 m/pixel
+        resolution_y: 200 ## 0.01 m/pixel
+        use_projected_center: false
+      </rosparam>
+    </node>
+
+    <node name="rt_accumulated_heightmap_pointcloud_triming"
+          pkg="nodelet" type="nodelet"
+          args="load jsk_pcl/HeightmapToPointCloud $(arg NODELET_MANAGER_NAME)">
+      <!-- <remap from="~input" to="rt_accumulated_heightmap/output" /> -->
+      <remap from="~input" to="rt_accumulated_heightmap_triming/output" />
+      <rosparam>
+        keep_organized: true
+      </rosparam>
+    </node>
+
+    <!-- this is not required if target_frame_id is $(arg CENTER_FRAME) -->
+    <!-- [tmp!!] convert to FIXED_FRAME -->
+    <!-- This is for fixing steppable region while walking -->
+    <node name="rt_accumulated_heightmap_pointcloud_odomrelative"
+          pkg="nodelet" type="nodelet"
+          args="load jsk_pcl_utils/TfTransformCloud $(arg NODELET_MANAGER_NAME)">
+      <remap from="~input" to="/rt_accumulated_heightmap_pointcloud_triming/output" />
+      <rosparam subst_value="true">
+        target_frame_id: $(arg FIXED_FRAME)
+      </rosparam>
+    </node>
+
+  </group>
+
+  <!-- multi plane segmentation -->
+  <node name="organized_multi_plane_segmentation"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/OrganizedMultiPlaneSegmentation $(arg NODELET_MANAGER_NAME)">
+    <remap from="~input" to="/depth_image_creator/output_cloud" unless="$(arg USE_HEIGHTMAP)"/>
+    <!-- <remap from="~input" to="/rt_accumulated_heightmap_pointcloud/output" if="$(arg USE_HEIGHTMAP)"/> -->
+    <!-- <remap from="~input" to="/rt_accumulated_heightmap_pointcloud_odomrelative/output" if="$(arg USE_HEIGHTMAP)"/> -->
+    <remap from="~input" to="/rt_accumulated_heightmap_pointcloud_odomrelative_fixed/output" if="$(arg USE_HEIGHTMAP)"/>
+    <rosparam>
+      min_size: 500
+      distance_threshold: 1.0
+      angular_threshold: 0.05
+      max_curvature: 0.03
+      ransac_refine_outlier_distance_threshold: 0.3
+      max_depth_change_factor: 0.01
+      publish_normal: true
+    </rosparam>
+  </node>
+
+  <node name="rviz" pkg="rviz" type="rviz"
+        args="-d $(find jsk_path_planner)/rviz/l515_and_t265.rviz"
+        output="screen" if="$(arg rviz)"/>
+</launch>

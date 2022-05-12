@@ -6,7 +6,7 @@
               -b 0
               /tf
               /tf_static
-              /rs_l515/depth/color/points_low_hz_resized
+              /rs_l515/depth/color/points
               /rs_l515/color/image_raw/compressed
               /rs_l515/color/camera_info
               /rt_filtered_accumulated_heightmap/output
