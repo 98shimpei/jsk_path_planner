@@ -3,7 +3,7 @@
   <arg name="rviz"                   default="false" />
   <arg name="ROBOT_FRAME"            default="BODY" />
   <arg name="CENTER_FRAME"           default="body_on_odom" />
-  <arg name="FIXED_FRAME"            default="odom_ground" />
+  <arg name="FIXED_FRAME"            default="odom_with_imu" />
   <arg name="NODELET_MANAGER_NAME"   default="recognize_steppable_region_nodelet"/>
   <arg name="NODELET_INDEX"          default="0"/>
 
@@ -171,137 +171,7 @@
         keep_organized: true
       </rosparam>
     </node>
-
-    <node pkg="nodelet" type="nodelet" name="rt_frustum_culling"
-          args="load jsk_pcl/FrustumCulling $(arg NODELET_MANAGER_NAME)" output="screen">
-      <remap from="~input" to="/rt_accumulated_heightmap_pointcloud/output" />
-      <!-- <remap from="~info" to="/rs_l515/depth/camera_info" /> -->
-      <remap from="~info" to="/rs_l515/color/camera_info" />
-      <rosparam subst_value="true">
-        <!-- camera_link_frame: rs_l515_depth_frame -->
-        camera_link_frame: rs_l515_depth_optical_frame
-        use_asynchronous: true
-        # use_asynchronous: false
-        # use_approximate: true
-        max_queue_size: 100
-        # custom_fov_h: 70.0
-        # custom_fov_v: 43.0
-        custom_fov_h: 35.0 # fov_h and fov_v is swapped!!
-        custom_fov_v: 62.0 # fov_h and fov_v is swapped!!
-        far_plane_distance: 1.5
-        #far_plane_distance: 1.0
-        negative: true
-      </rosparam>
-    </node>
-
-    <node name="rt_pass_through_z"
-          pkg="nodelet" type="nodelet"
-          args="load pcl/PassThrough $(arg NODELET_MANAGER_NAME)">
-      <remap from="~input" to="/rt_frustum_culling/output_cloud"/>
-      <rosparam>
-        filter_field_name: z
-        filter_limit_min: -2.1
-        filter_limit_max: 4.5
-        filter_limit_negative: False
-      </rosparam>
-    </node>
-
-    <node name="rt_accumulated_heightmap"
-          pkg="nodelet" type="nodelet"
-          args="load jsk_pcl/HeightmapTimeAccumulation $(arg NODELET_MANAGER_NAME)">
-      <!-- <remap from="~input" to="/rt_current_heightmap/output" /> -->
-      <remap from="~input" to="/rt_filtered_current_heightmap/output" />
-      <!-- <remap from="~input/prev_pointcloud" to="/rt_frustum_culling/output_cloud" /> -->
-      <remap from="~input/prev_pointcloud" to="/rt_pass_through_z/output" />
-      <rosparam subst_value="true">
-        center_frame_id: $(arg CENTER_FRAME)
-        fixed_frame_id: $(arg FIXED_FRAME)
-        use_bilateral: false
-      </rosparam>
-    </node>
-
-    <node name="rt_filtered_accumulated_heightmap"
-          pkg="nodelet" type="nodelet"
-          args="load jsk_pcl/HeightmapMorphologicalFiltering $(arg NODELET_MANAGER_NAME)">
-      <remap from="~input" to="/rt_accumulated_heightmap/output" />
-      <rosparam subst_value="true">
-        mask_size: 3 ## cover within 0.06m
-        max_variance: 0.0002 ### (* 0.014 0.014)
-        smooth_method: max_distance
-        use_bilateral: false
-        bilateral_filter_size: 1
-        bilateral_sigma_color: 0.028
-        bilateral_sigma_space: 3
-      </rosparam>
-    </node>
-
-    <node name="rt_accumulated_heightmap_pointcloud"
-          pkg="nodelet" type="nodelet"
-          args="load jsk_pcl/HeightmapToPointCloud $(arg NODELET_MANAGER_NAME)">
-      <!-- <remap from="~input" to="rt_accumulated_heightmap/output" /> -->
-      <remap from="~input" to="rt_filtered_accumulated_heightmap/output" />
-      <rosparam>
-        keep_organized: true
-      </rosparam>
-    </node>
-
-    <node name="rt_accumulated_heightmap_triming"
-          pkg="nodelet" type="nodelet"
-          args="load jsk_pcl/HeightmapConverter $(arg NODELET_MANAGER_NAME)">
-      <remap from="~input" to="rt_accumulated_heightmap_pointcloud/output" />
-      <rosparam subst_value="true">
-        min_x: -1.0
-        max_x:  1.0
-        min_y: -1.0
-        max_y:  1.0
-        resolution_x: 200 ## 0.01 m/pixel
-        resolution_y: 200 ## 0.01 m/pixel
-        use_projected_center: false
-      </rosparam>
-    </node>
-
-    <node name="rt_accumulated_heightmap_pointcloud_triming"
-          pkg="nodelet" type="nodelet"
-          args="load jsk_pcl/HeightmapToPointCloud $(arg NODELET_MANAGER_NAME)">
-      <!-- <remap from="~input" to="rt_accumulated_heightmap/output" /> -->
-      <remap from="~input" to="rt_accumulated_heightmap_triming/output" />
-      <rosparam>
-        keep_organized: true
-      </rosparam>
-    </node>
-
-    <!-- this is not required if target_frame_id is $(arg CENTER_FRAME) -->
-    <!-- [tmp!!] convert to FIXED_FRAME -->
-    <!-- This is for fixing steppable region while walking -->
-    <node name="rt_accumulated_heightmap_pointcloud_odomrelative"
-          pkg="nodelet" type="nodelet"
-          args="load jsk_pcl_utils/TfTransformCloud $(arg NODELET_MANAGER_NAME)">
-      <remap from="~input" to="/rt_accumulated_heightmap_pointcloud_triming/output" />
-      <rosparam subst_value="true">
-        target_frame_id: $(arg FIXED_FRAME)
-      </rosparam>
-    </node>
-
   </group>
-
-  <!-- multi plane segmentation -->
-  <node name="organized_multi_plane_segmentation"
-        pkg="nodelet" type="nodelet"
-        args="load jsk_pcl/OrganizedMultiPlaneSegmentation $(arg NODELET_MANAGER_NAME)">
-    <remap from="~input" to="/depth_image_creator/output_cloud" unless="$(arg USE_HEIGHTMAP)"/>
-    <!-- <remap from="~input" to="/rt_accumulated_heightmap_pointcloud/output" if="$(arg USE_HEIGHTMAP)"/> -->
-    <!-- <remap from="~input" to="/rt_accumulated_heightmap_pointcloud_odomrelative/output" if="$(arg USE_HEIGHTMAP)"/> -->
-    <remap from="~input" to="/rt_accumulated_heightmap_pointcloud_odomrelative_fixed/output" if="$(arg USE_HEIGHTMAP)"/>
-    <rosparam>
-      min_size: 500
-      distance_threshold: 1.0
-      angular_threshold: 0.05
-      max_curvature: 0.03
-      ransac_refine_outlier_distance_threshold: 0.3
-      max_depth_change_factor: 0.01
-      publish_normal: true
-    </rosparam>
-  </node>
 
   <node name="rviz" pkg="rviz" type="rviz"
         args="-d $(find jsk_path_planner)/rviz/l515_and_t265.rviz"
