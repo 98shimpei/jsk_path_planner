@@ -32,7 +32,7 @@
       <param name="accumulate_length"           value="500"/>
       <param name="accumulate_center_x"         value="150"/>
       <param name="accumulate_center_y"         value="250"/>
-      <param name="fixed_frame"                 value="odom_with_imu"/>
+      <param name="fixed_frame"                 value="leg_base_odom"/>
       <param name="fov_h"                       value="57"/>
       <param name="fov_v"                       value="30"/>
       <param name="camera_frame"                value="rs_l515_depth_optical_frame"/>

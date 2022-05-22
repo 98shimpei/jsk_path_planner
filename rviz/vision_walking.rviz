@@ -8,6 +8,7 @@ Panels:
         - /PointCloud21
         - /PointCloud21/Autocompute Value Bounds1
         - /Image1
+        - /TF1
         - /TF1/Frames1
         - /Odometry1/Shape1
         - /Odometry2/Shape1
@@ -198,8 +199,6 @@ Visualization Manager:
           Value: false
         RLEG_LINK5:
           Value: false
-        body_on_odom:
-          Value: true
         choreonoid_origin:
           Value: true
         ground:
@@ -215,11 +214,13 @@ Visualization Manager:
         head_root:
           Value: false
         imu_floor:
-          Value: false
+          Value: true
         larm_end_coords:
           Value: false
         left_camera_optical_frame:
           Value: false
+        leg_base_odom:
+          Value: true
         leg_odom:
           Value: false
         lfsensor:
@@ -230,12 +231,8 @@ Visualization Manager:
           Value: false
         odom:
           Value: false
-        odom_init:
-          Value: false
         odom_on_ground:
           Value: false
-        odom_with_imu:
-          Value: true
         rarm_end_coords:
           Value: false
         rfsensor:
@@ -262,111 +259,109 @@ Visualization Manager:
       Show Axes: true
       Show Names: true
       Tree:
-        odom_init:
-          odom:
-            BODY:
-              CHEST_LINK0:
-                CHEST_LINK1:
-                  CHEST_LINK2:
-                    CHEST_CAMERA:
-                      {}
-                    HEAD_LINK0:
-                      HEAD_LINK1:
-                        HEAD_LEFT_CAMERA:
-                          left_camera_optical_frame:
-                            {}
-                        HEAD_RIGHT_CAMERA:
+        odom:
+          BODY:
+            CHEST_LINK0:
+              CHEST_LINK1:
+                CHEST_LINK2:
+                  CHEST_CAMERA:
+                    {}
+                  HEAD_LINK0:
+                    HEAD_LINK1:
+                      HEAD_LEFT_CAMERA:
+                        left_camera_optical_frame:
                           {}
-                        head_end_coords:
+                      HEAD_RIGHT_CAMERA:
+                        {}
+                      head_end_coords:
+                        {}
+                      head_root:
+                        {}
+                      rs_l515_link:
+                        rs_l515_color_optical_frame:
                           {}
-                        head_root:
+                        rs_l515_depth_optical_frame:
                           {}
-                        rs_l515_link:
-                          rs_l515_color_optical_frame:
-                            {}
-                          rs_l515_depth_optical_frame:
-                            {}
-                        rs_t265_link:
-                          rs_t265_fisheye1_optical_frame:
-                            {}
-                    LARM_LINK0:
-                      LARM_LINK1:
-                        LARM_LINK2:
-                          LARM_LINK3:
-                            LARM_LINK4:
-                              LARM_LINK5:
-                                LARM_LINK6:
-                                  LARM_LINK7:
-                                    LARM_CAMERA:
-                                      {}
-                                    LARM_CAMERA_N:
-                                      {}
-                                    LARM_FINGER0:
-                                      {}
-                                    LARM_FINGER1:
-                                      {}
-                                    larm_end_coords:
-                                      {}
-                                    lhsensor:
-                                      {}
-                    RARM_LINK0:
-                      RARM_LINK1:
-                        RARM_LINK2:
-                          RARM_LINK3:
-                            RARM_LINK4:
-                              RARM_LINK5:
-                                RARM_LINK6:
-                                  RARM_LINK7:
-                                    RARM_CAMERA:
-                                      {}
-                                    RARM_CAMERA_N:
-                                      {}
-                                    RARM_FINGER0:
-                                      {}
-                                    RARM_FINGER1:
-                                      {}
-                                    rarm_end_coords:
-                                      {}
-                                    rhsensor:
-                                      {}
-              LLEG_LINK0:
-                LLEG_LINK1:
-                  LLEG_LINK2:
-                    LLEG_LINK3:
-                      LLEG_LINK4:
-                        LLEG_LINK5:
-                          lfsensor:
-                            {}
-                          lleg_end_coords:
-                            {}
-              RLEG_LINK0:
-                RLEG_LINK1:
-                  RLEG_LINK2:
-                    RLEG_LINK3:
-                      RLEG_LINK4:
-                        RLEG_LINK5:
-                          rfsensor:
-                            {}
-                          rleg_end_coords:
-                            odom_with_imu:
-                              {}
-              body_on_odom:
-                {}
-              choreonoid_origin:
-                {}
-              ground:
-                {}
-              gsensor:
-                {}
-              gyrometer:
-                imu_floor:
-                  {}
-              leg_odom:
-                {}
-              zmp:
-                {}
-            odom_on_ground:
+                      rs_t265_link:
+                        rs_t265_fisheye1_optical_frame:
+                          {}
+                  LARM_LINK0:
+                    LARM_LINK1:
+                      LARM_LINK2:
+                        LARM_LINK3:
+                          LARM_LINK4:
+                            LARM_LINK5:
+                              LARM_LINK6:
+                                LARM_LINK7:
+                                  LARM_CAMERA:
+                                    {}
+                                  LARM_CAMERA_N:
+                                    {}
+                                  LARM_FINGER0:
+                                    {}
+                                  LARM_FINGER1:
+                                    {}
+                                  larm_end_coords:
+                                    {}
+                                  lhsensor:
+                                    {}
+                  RARM_LINK0:
+                    RARM_LINK1:
+                      RARM_LINK2:
+                        RARM_LINK3:
+                          RARM_LINK4:
+                            RARM_LINK5:
+                              RARM_LINK6:
+                                RARM_LINK7:
+                                  RARM_CAMERA:
+                                    {}
+                                  RARM_CAMERA_N:
+                                    {}
+                                  RARM_FINGER0:
+                                    {}
+                                  RARM_FINGER1:
+                                    {}
+                                  rarm_end_coords:
+                                    {}
+                                  rhsensor:
+                                    {}
+            LLEG_LINK0:
+              LLEG_LINK1:
+                LLEG_LINK2:
+                  LLEG_LINK3:
+                    LLEG_LINK4:
+                      LLEG_LINK5:
+                        lfsensor:
+                          {}
+                        lleg_end_coords:
+                          {}
+            RLEG_LINK0:
+              RLEG_LINK1:
+                RLEG_LINK2:
+                  RLEG_LINK3:
+                    RLEG_LINK4:
+                      RLEG_LINK5:
+                        rfsensor:
+                          {}
+                        rleg_end_coords:
+                          {}
+            choreonoid_origin:
               {}
+            ground:
+              {}
+            gsensor:
+              {}
+            gyrometer:
+              imu_floor:
+                {}
+            leg_base_odom:
+              {}
+            leg_odom:
+              {}
+            zmp:
+              {}
+          odom_on_ground:
+            {}
       Update Interval: 0
       Value: true
     - Alpha: 1
@@ -1008,25 +1003,25 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 4.709580421447754
+      Distance: 4.612251281738281
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 1.413149356842041
-        Y: 0.18294298648834229
-        Z: 0.688529372215271
+        X: 0.07273709028959274
+        Y: -0.5670023560523987
+        Z: 0.3454885184764862
       Focal Shape Fixed Size: false
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.344797283411026
+      Pitch: 0.04479710012674332
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 6.266795635223389
+      Yaw: 6.276790618896484
     Saved: ~
 Window Geometry:
   Camera:
