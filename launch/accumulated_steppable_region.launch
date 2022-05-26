@@ -26,12 +26,15 @@
       <param name="steppable_terrain_angle"     value="0.20"/>
       <param name="steppable_slope_angle"       value="0.35"/>
       <param name="obstacle_range"              value="15.0"/>
-      <param name="obstacle_height"             value="0.04"/>
+      <param name="obstacle_height"             value="0.05"/>
       <param name="height_limit"                value="0.45"/>
       <param name="erode_range"                 value="4"/>
       <param name="accumulate_length"           value="500"/>
       <param name="accumulate_center_x"         value="150"/>
       <param name="accumulate_center_y"         value="250"/>
+      <param name="trimmed_length"           value="200"/>
+      <param name="trimmed_center_x"         value="100"/>
+      <param name="trimmed_center_y"         value="100"/>
       <param name="fixed_frame"                 value="leg_base_odom"/>
       <param name="fov_h"                       value="57"/>
       <param name="fov_v"                       value="30"/>
