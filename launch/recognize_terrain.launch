@@ -3,7 +3,7 @@
   <arg name="rviz"                   default="false" />
   <arg name="ROBOT_FRAME"            default="BODY" />
   <arg name="CENTER_FRAME"           default="body_on_odom" />
-  <arg name="FIXED_FRAME"            default="leg_base_odom" />
+  <arg name="FIXED_FRAME"            default="leg_odom" />
   <arg name="NODELET_MANAGER_NAME"   default="recognize_steppable_region_nodelet"/>
   <arg name="NODELET_INDEX"          default="0"/>
 
@@ -63,21 +63,20 @@
   </node>
 
   <!-- transform pointcloud to robot center -->
-  <node pkg="nodelet" type="nodelet" name="robot_center_pointcloud"
-        args="load jsk_pcl/TfTransformCloud $(arg NODELET_MANAGER_NAME)" output="screen">
-    <remap from="~input" to="$(arg rs_name_space)/points_low_hz" />
-    <rosparam subst_value="true">
-      target_frame_id: $(arg CENTER_FRAME)
-      # target_frame_id: $(arg ROBOT_FRAME)
-    </rosparam>
-  </node>
+  <!-- <node pkg="nodelet" type="nodelet" name="robot_center_pointcloud" -->
+  <!--       args="load jsk_pcl/TfTransformCloud $(arg NODELET_MANAGER_NAME)" output="screen"> -->
+  <!--   <remap from="~input" to="$(arg rs_name_space)/points_low_hz_resized" /> -->
+  <!--   <rosparam subst_value="true"> -->
+  <!--     target_frame_id: $(arg CENTER_FRAME) -->
+  <!--   </rosparam> -->
+  <!-- </node> -->
 
   <!-- self filter -->
   <group if="$(arg USE_SELF_FILTER)">
     <node pkg="robot_self_filter" type="self_filter"
           name="robot_center_pointcloud_sf" output="screen">
-      <!-- <remap from="cloud_in"  to="$(arg rs_name_space)/points_low_hz_resized" /> -->
-      <remap from="cloud_in"  to="/robot_center_pointcloud/output" />
+      <remap from="cloud_in"  to="$(arg rs_name_space)/points_low_hz_resized" />
+      <!-- <remap from="cloud_in"  to="/robot_center_pointcloud/output" /> -->
       <remap from="cloud_out" to="$(arg rs_name_space)/points_filtered" />
       <rosparam subst_value="true">
         use_rgb: true
@@ -111,14 +110,14 @@
     </node>
     <node pkg="nodelet" type="nodelet" name="object_bbox_clipper"
           args="load jsk_pcl/AttentionClipper $(arg NODELET_MANAGER_NAME)" output="screen">
-      <!-- <remap from="~input/points" to="/self_filtered_pointcloud/output" /> -->
-      <remap from="~input/points" to="/robot_center_pointcloud/output" />
+      <remap from="~input/points" to="/self_filtered_pointcloud/output" />
+      <!-- <remap from="~input/points" to="/robot_center_pointcloud/output" /> -->
       <remap from="~input/box" to="/object_bbox" />
     </node>
     <node pkg="nodelet" type="nodelet" name="self_filtered_pointcloud_bbox_clipped"
           args="load jsk_pcl/ExtractIndices $(arg NODELET_MANAGER_NAME)" output="screen">
-      <!-- <remap from="~input" to="/self_filtered_pointcloud/output" /> -->
-      <remap from="~input" to="/robot_center_pointcloud/output" />
+      <remap from="~input" to="/self_filtered_pointcloud/output" />
+      <!-- <remap from="~input" to="/robot_center_pointcloud/output" /> -->
       <remap from="~indices" to="/object_bbox_clipper/output/point_indices" />
       <rosparam subst_value="true">
         negative: true
@@ -136,8 +135,8 @@
       <remap from="~input" to="$(arg HEIGHTMAP_INPUT)" />
       <!-- <remap from="~input" to="$(arg rs_name_space)/points_filtered" /> -->
       <rosparam subst_value="true">
-        min_x:  0.5
-        max_x:  3.5
+        min_x:  0.0
+        max_x:  3.0
         min_y: -2.5
         max_y:  2.5
         resolution_x: 300 ## 0.01 m/pixel
