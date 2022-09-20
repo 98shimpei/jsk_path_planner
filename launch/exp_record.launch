@@ -9,6 +9,8 @@
               /rs_l515/color/image_raw/compressed
               /rs_l515/color/camera_info
               /rt_current_heightmap_pointcloud/output
+              /rt_filtered_current_heightmap/output/config
+              /rt_filtered_current_heightmap/output
               /steppable_region
               /landing_pose
               /landing_pose_marker

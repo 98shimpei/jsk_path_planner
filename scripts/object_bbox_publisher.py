@@ -51,9 +51,9 @@ else:
   #position = Point(0.9, 0.0, -0.3)
   #orientation = Quaternion(0.0, 0.0, 0.0, 1.0)
   #dimensions = Vector3(1.7, 1.5, 2.7)
-  position = Point(0, 0.0, 0)
-  orientation = Quaternion(0.0, 0.0, 0.0, 1.0)
-  dimensions = Vector3(1.1, 1.1, 5.0)
+  position = Point(0, 0.0, 0.3)
+  orientation = Quaternion(0.0, 0.0, 0.0, 1)
+  dimensions = Vector3(1.1, 1.1, 1.8)
   print("koko")
 
 if set_marker_id:

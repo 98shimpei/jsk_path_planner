@@ -3,7 +3,7 @@
   <arg name="rviz"                   default="false" />
   <arg name="ROBOT_FRAME"            default="BODY" />
   <arg name="CENTER_FRAME"           default="body_on_odom" />
-  <arg name="FIXED_FRAME"            default="leg_odom" />
+  <arg name="FIXED_FRAME"            default="choreonoid_origin" />
   <arg name="NODELET_MANAGER_NAME"   default="recognize_steppable_region_nodelet"/>
   <arg name="NODELET_INDEX"          default="0"/>
 
