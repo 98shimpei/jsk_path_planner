@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+<launch>
+  <arg name="manager_name" default="nodelet_manager" />
+  <arg name="manager_threads" default="4" />
+
+  <arg name="publish_steppable_region" default="true" />
+  <arg name="add_local_plane" default="false" />
+
+  <node pkg="nodelet" type="nodelet" name="$(arg manager_name)" args="manager" output="screen">
+    <param name="num_worker_threads" value="$(arg manager_threads)" />
+  </node>
+
+  <node pkg="nodelet" type="nodelet" name="node_loader0"
+        args="load safe_footstep_planner/accumulated_steppable_region_publisher_nodelet $(arg manager_name)" >
+    <param name="grid_length"                 value="1.0"/>
+    <param name="steppable_range"             value="7"/>
+    <param name="steppable_terrain_angle"     value="0.20"/>
+    <param name="steppable_slope_angle"       value="0.35"/>
+    <param name="obstacle_range"              value="15.0"/>
+    <param name="obstacle_height"             value="0.05"/>
+    <param name="height_limit"                value="0.45"/>
+    <param name="erode_range"                 value="4"/>
+    <param name="accumulate_length"           value="500"/>
+    <param name="accumulate_center_x"         value="150"/>
+    <param name="accumulate_center_y"         value="250"/>
+    <param name="trimmed_length"           value="200"/>
+    <param name="trimmed_center_x"         value="100"/>
+    <param name="trimmed_center_y"         value="100"/>
+    <param name="fixed_frame"                 value="odom_ground"/>
+    <param name="fov_h"                       value="57"/>
+    <param name="fov_v"                       value="30"/>
+    <param name="camera_frame"                value="rs_l515_depth_optical_frame"/>
+  </node>
+
+  <node pkg="nodelet" type="nodelet" name="node_loader1"
+        args="load safe_footstep_planner/target_height_publisher_nodelet $(arg manager_name)" >
+    <param name="accumulate_length"           value="500"/>
+    <param name="accumulate_center_x"         value="150"/>
+    <param name="accumulate_center_y"         value="250"/>
+    <param name="fixed_frame"                 value="odom_ground"/>
+  </node>
+
+</launch>

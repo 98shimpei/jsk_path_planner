@@ -1,0 +1,32 @@
+<launch>
+  <arg name="bagfile" default="steppable_region_exp.bag"/>
+  <node name="rosbag_record"
+        pkg="rosbag" type="record"
+        args="-o $(arg bagfile)
+              -b 0
+              /tf
+              /tf_static
+              /rs_l515/color/image_raw/compressed
+              /rs_l515/color/camera_info
+              /rt_current_heightmap_pointcloud/output
+              /steppable_region
+              /landing_pose
+              /landing_pose_marker
+              /landing_height
+              /landing_target
+              /object_bbox
+              /lhsensor
+              /rhsensor
+              /is_stuck
+              /output
+              /output_polygon
+              /move_base/global_costmap/costmap
+              /move_base/local_costmap/costmap
+              /move_base/NavfnROS/plan
+              /move_base/TebLocalPlannerROS/local_plan
+              /move_base/TebLocalPlannerROS/teb_markers
+              /move_base/TebLocalPlannerROS/teb_poses
+              /visited_path"
+        output="screen">
+  </node>
+</launch>
