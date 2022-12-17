@@ -3,7 +3,7 @@
   <arg name="rviz"                   default="false" />
   <arg name="ROBOT_FRAME"            default="BODY" />
   <arg name="CENTER_FRAME"           default="body_on_odom" />
-  <arg name="FIXED_FRAME"            default="choreonoid_origin" />
+  <arg name="FIXED_FRAME"            default="leg_odom" />
   <arg name="NODELET_MANAGER_NAME"   default="recognize_steppable_region_nodelet"/>
   <arg name="NODELET_INDEX"          default="0"/>
 
@@ -166,6 +166,15 @@
           args="load jsk_pcl/HeightmapToPointCloud $(arg NODELET_MANAGER_NAME)">
       <!-- <remap from="~input" to="rt_accumulated_heightmap/output" /> -->
       <remap from="~input" to="rt_filtered_current_heightmap/output" />
+      <rosparam>
+        keep_organized: true
+      </rosparam>
+    </node>
+
+    <node name="step_heightmap_pointcloud"
+          pkg="nodelet" type="nodelet"
+          args="load jsk_pcl/HeightmapToPointCloud $(arg NODELET_MANAGER_NAME)">
+      <remap from="~input" to="step_heightmap/output" />
       <rosparam>
         keep_organized: true
       </rosparam>
